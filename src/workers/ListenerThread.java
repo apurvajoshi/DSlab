@@ -41,7 +41,7 @@ public class ListenerThread extends Thread {
 		      }
 			  
 			  new Thread(
-					  new ReceiverThread(clientSocket, this.rcvQueue)
+					  new ReceiverThread(clientSocket)
 					  ).start();
 		  }
 	  }  

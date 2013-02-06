@@ -2,7 +2,6 @@ package workers;
 import manager.MessagePasser;
 import manager.MulticastManager;
 import java.net.*;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.*;
 
@@ -10,11 +9,10 @@ import model.TimeStampedMessage;
 
 public class ReceiverThread implements Runnable{
 
-    protected Socket clientSocket = null;
-	
+    protected Socket clientSocket = null;	
 	private ConcurrentHashMap<String, MulticastManager> holdQueue;
 
-    public ReceiverThread(Socket clientSocket, List<TimeStampedMessage> queue) {
+    public ReceiverThread(Socket clientSocket) {
 
 		holdQueue = new ConcurrentHashMap<String, MulticastManager> ();
         this.clientSocket = clientSocket;        
@@ -55,13 +53,8 @@ public class ReceiverThread implements Runnable{
     public void ProcessMulticastMessage(TimeStampedMessage msg) {
 
     	int msgOrder = msg.getTimeStamp().compare(MessagePasser.getInstance().clockService.getTimestamp());
-    	
-    	if (msg.getKind().compareTo("ack") != 0) {
-    		
-    		if (msg.getSrc().equals(MessagePasser.getInstance().localName)) {
-    			return; //Drop messages from yourself
-    		}
-    		
+
+		if (msg.getKind().compareTo("ack") != 0) {
     		if (msgOrder == 2) {
         		//New Timestamp
     			if (holdQueue.containsKey(msg.getTimeStamp().toString())) {
