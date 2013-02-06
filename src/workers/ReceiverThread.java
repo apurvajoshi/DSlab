@@ -1,6 +1,7 @@
 package workers;
 import manager.MessagePasser;
 import manager.MulticastManager;
+import clock.TimeStamp;
 import java.net.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -121,9 +122,41 @@ public class ReceiverThread implements Runnable{
     
     public void addThreadRcvQueue() {
     	for (Entry<String, MulticastManager> entry : holdQueue.entrySet()) {
-    		if (entry.getValue().
-    			if (entry.getValue().getMessage().getSrc().equals(MessagePasser.localName))
+    		if (entry.getValue().ifAllAckReceived()) {
+    			if (entry.getValue().getMessage().getSrc().equals(MessagePasser.localName)) {
+    				holdQueue.remove(entry.getKey());
+    			}
+    			else {
+    				if (inorder(entry.getValue().getMessage())) {
+    					
+        				TimeStampedMessage m = holdQueue.remove(entry.getKey()).getMessage(); 
+        				MessagePasser.getInstance().threadRcvQueue.add(m);	
+    				}
+    				
+    			}
     		}
     	}
+    }
+    
+    public boolean inorder(TimeStampedMessage m) {
+    	//inorder
+    	TimeStamp localTS = MessagePasser.getInstance().clockService.getTimestamp();
+    	TimeStamp mesgTS = m.getTimeStamp();
+    	
+    	int mesgIdx = MessagePasser.getInstance().nodes.indexOf(MessagePasser.getInstance().findNodeByName(m.getSrc()));
+    	
+		if (mesgTS.getCount().get(mesgIdx) != (localTS.getCount().get(mesgIdx) + 1)) {
+			return false;
+		}
+		
+		for (int i = 0; i < mesgTS.getCount().size(); i++) {
+			if (i != mesgIdx) {
+				if (mesgTS.getCount().get(i) > localTS.getCount().get(i)) {
+					return false;
+				}
+			}
+		}
+		
+		return true;		
     }
 }
