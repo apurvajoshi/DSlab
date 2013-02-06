@@ -6,8 +6,6 @@ import java.net.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.*;
-
-import model.Node;
 import model.TimeStampedMessage;
 
 public class ReceiverThread implements Runnable{
@@ -100,10 +98,17 @@ public class ReceiverThread implements Runnable{
     				// New ACK but in hold queue
     				System.out.println("New ACK in hold queue, so update ACK ");
     				holdQueue.get(msg.getTimeStamp()).setAck(msg.getSrc());
+    				if (holdQueue.get(msg.getTimeStamp().getCount().toString()).ifAllAckReceived())
+    				{
+    					
+    					while(addThreadRcvQueue() == 1);
+    				}
+    					
     			}
     			else {
     				this.holdQueue.put(msg.getTimeStamp().getCount().toString(), new MulticastManager((TimeStampedMessage)msg.getData()));
     				System.out.println("New Message received through ACK ");
+    				holdQueue.get(msg.getTimeStamp()).setAck(msg.getSrc());
     				sendMulticastAck((TimeStampedMessage)msg.getData());
     			}
     		}
@@ -120,7 +125,7 @@ public class ReceiverThread implements Runnable{
   	  }
     }
     
-    public void addThreadRcvQueue() {
+    public int addThreadRcvQueue() {
     	for (Entry<String, MulticastManager> entry : holdQueue.entrySet()) {
     		if (entry.getValue().ifAllAckReceived()) {
     			if (entry.getValue().getMessage().getSrc().equals(MessagePasser.localName)) {
@@ -128,14 +133,15 @@ public class ReceiverThread implements Runnable{
     			}
     			else {
     				if (inorder(entry.getValue().getMessage())) {
-    					
         				TimeStampedMessage m = holdQueue.remove(entry.getKey()).getMessage(); 
-        				MessagePasser.getInstance().threadRcvQueue.add(m);	
+        				MessagePasser.getInstance().threadRcvQueue.add(m);
+        				return 1;
     				}
     				
     			}
     		}
     	}
+		return 0;
     }
     
     public boolean inorder(TimeStampedMessage m) {
