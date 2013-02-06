@@ -5,7 +5,6 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import model.Node;
 import model.TimeStampedMessage;
-import workers.SenderThread;
 
 public class MulticastManager {
 	private TimeStampedMessage message;
@@ -66,7 +65,7 @@ public class MulticastManager {
 	            	cancelTimer = 0;
 	            	 TimeStampedMessage msg = new TimeStampedMessage(MessagePasser.localName, entry.getKey().getName(), 
 	 	            		"replay", message, message.getTimeStamp());
-	 	            new SenderThread(msg, entry.getKey().getIp(), entry.getKey().getPort(), MessagePasser.clientSockets, msg.getDest());
+	            	 MessagePasser.getInstance().send(msg);
 	            }
 	        }
 			if(cancelTimer == 1) {

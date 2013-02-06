@@ -56,20 +56,33 @@ public class ReceiverThread implements Runnable{
 
     	int msgOrder = msg.getTimeStamp().compare(MessagePasser.getInstance().clockService.getTimestamp());
 
+    	
+    	
 		if (msg.getKind().compareTo("ack") != 0) {
+			
+			if (msg.getSrc().equals(MessagePasser.localName)) {
+	    		if(!this.holdQueue.contains(msg.getTimeStamp().getCount().toString()))
+	    			this.holdQueue.put(msg.getTimeStamp().getCount().toString(), new MulticastManager(msg));
+	    		
+	    		return;
+	    	}
+			
     		if (msgOrder == 2) {
         		//New Timestamp
-    			if (holdQueue.containsKey(msg.getTimeStamp().toString())) {
+    			if (holdQueue.containsKey(msg.getTimeStamp().getCount().toString())) {
     				//Duplicate message, already exists in hashmap
+    				System.out.println("Duplicate message already exists in hashmap = " + msg.getTimeStamp().getCount().toString());
     				sendMulticastAck(msg);
     			}  
     			else {
     				//else new message , add to hold queue
-            		this.holdQueue.put(msg.getTimeStamp().toString(), new MulticastManager(msg));	
+    				System.out.println("New Message received = " + msg.getTimeStamp().getCount().toString());
+            		this.holdQueue.put(msg.getTimeStamp().getCount().toString(), new MulticastManager(msg));	
     			}        		
         	}
         	else if ((msgOrder == 1) || (msgOrder == 0) || (msg.getKind().equals("replay"))) {
-        		//Old Message    	
+        		//Old Message
+        		System.out.println("Old Message received" + msg.getTimeStamp().getCount().toString() +"  msgorder = " + msgOrder + "(1, 0 = Already Processed)");
         		sendMulticastAck(msg);
         	}    		
     	}
@@ -78,14 +91,18 @@ public class ReceiverThread implements Runnable{
     		// If Ack is <= Current Timestamp or if I am the source, drop it.
     		if (((msgOrder == 0) || (msgOrder == 1)) || (msg.getSrc().equals(MessagePasser.localName))) {
     			//drop message
+    			System.out.println("Drop ACK - old / equal or mine");
     			return; 
     		}
     		else {
     			if (holdQueue.contains(msg.getTimeStamp())) {
+    				// New ACK but in hold queue
+    				System.out.println("New ACK in hold queue, so update ACK ");
     				holdQueue.get(msg.getTimeStamp()).setAck(msg.getSrc());
     			}
     			else {
-    				this.holdQueue.put(msg.getTimeStamp().toString(), new MulticastManager((TimeStampedMessage)msg.getData()));
+    				this.holdQueue.put(msg.getTimeStamp().getCount().toString(), new MulticastManager((TimeStampedMessage)msg.getData()));
+    				System.out.println("New Message received through ACK ");
     				sendMulticastAck((TimeStampedMessage)msg.getData());
     			}
     		}

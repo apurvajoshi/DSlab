@@ -42,7 +42,7 @@ public class MessagePasser {
   private HashMap<Rule, Integer> rcvNthCount;
   private ArrayList<TimeStampedMessage> sendQueue;
   private ArrayList<TimeStampedMessage> rcvQueue;
-  private List<TimeStampedMessage> threadRcvQueue;
+  public List<TimeStampedMessage> threadRcvQueue;
   private File configFile;  
   
   
@@ -234,7 +234,7 @@ public class MessagePasser {
   }
   
  
-   public void send(TimeStampedMessage message)
+  public synchronized void send(TimeStampedMessage message)
   {	  
 	  /* Set the id of the message before sending it */
 	  message.setId(MessagePasser.ID);
@@ -361,12 +361,11 @@ public class MessagePasser {
 	  {
 		  clockService.resyncTimeStamp(this.rcvQueue.get(0).getTimeStamp());
 		  
-		  if(clockService.getClass().getSimpleName().equals("LogicalClock"))
+		  /*if(clockService.getClass().getSimpleName().equals("LogicalClock"))
 			  clockService.increment(0);
 		  else
-			  clockService.increment(nodes.indexOf(findNodeByName(localName)));
+			  clockService.increment(nodes.indexOf(findNodeByName(localName)));*/
 		  
-		  //clockService.increment(nodes.indexOf(findNodeByName(localName)));
 		  System.out.println("The message is from " + this.rcvQueue.get(0).getSrc() + " to " +
 	  this.rcvQueue.get(0).getDest() + " with ID " + this.rcvQueue.get(0).getId() + 
 	  " TIMESTAMP " + clockService.getTimestamp().getCount());
@@ -428,10 +427,11 @@ public class MessagePasser {
 		  {
 			  clockService.resyncTimeStamp(this.rcvQueue.get(0).getTimeStamp());
 			  
-			  if(clockService.getClass().getSimpleName().equals("LogicalClock"))
+			  /*if(clockService.getClass().getSimpleName().equals("LogicalClock"))
 				  clockService.increment(0);
 			  else
-				  clockService.increment(nodes.indexOf(findNodeByName(localName)));
+				  clockService.increment(nodes.indexOf(findNodeByName(localName)));*/
+			  
 			  System.out.println("The message is from " + this.rcvQueue.get(0).getSrc() + " to " +
 					  this.rcvQueue.get(0).getDest() + " with ID " + this.rcvQueue.get(0).getId() + 
 					  " TIMESTAMP " +  clockService.getTimestamp().getCount());
