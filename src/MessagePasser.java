@@ -66,7 +66,7 @@ public class MessagePasser {
 		  
 	  try
 	  {
-		  Thread t = new SetupServerSocket(node.getPort(), this.threadRcvQueue);
+		  Thread t = new SetupServerSocket(node.getPort(), this.threadRcvQueue, this.clockService);
 		  t.start();
 	  } 
 	  catch(IOException e)
