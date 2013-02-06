@@ -19,7 +19,7 @@ public class MessagePasser {
   public ArrayList<Node> nodes;
   public ArrayList<Rule> sendRules;
   public ArrayList<Rule> receiveRules;
-  public HashMap<String, Socket> clientSockets;
+  public static HashMap<String, Socket> clientSockets;
   public boolean LogMessage = false;
 
   private static Integer ID = 1;
@@ -31,7 +31,7 @@ public class MessagePasser {
   private List<TimeStampedMessage> threadRcvQueue;
   private File configFile;
   private ClockService clockService;
-  private String LocalName;
+  public static String localName;
   
   public MessagePasser(String configuration_filename, String local_name)
   {
@@ -45,7 +45,7 @@ public class MessagePasser {
 	  rcvQueue = new ArrayList<TimeStampedMessage>();
 	  threadRcvQueue = Collections.synchronizedList(new ArrayList<TimeStampedMessage>());
 	  configFile = new File(configuration_filename);
-	  LocalName = local_name;
+	  localName = local_name;
 	  
 	  
 	  try 
@@ -197,6 +197,16 @@ public class MessagePasser {
       return rule;
   }
   
+  
+  public void sendMulticastMessage(Object data)
+  {
+	  for(int i = 0; i < nodes.size(); i++)
+	  {
+  		TimeStampedMessage msg = new TimeStampedMessage(localName, nodes.get(i).getName(), "multicast", data, this.getClockService().getTimestamp());
+  		send(msg);
+	  }
+  }
+  
  
   void send(TimeStampedMessage message)
   {	  
@@ -222,10 +232,6 @@ public class MessagePasser {
     	  
     	  /* Reset the Nth and EveryNth Counters if the file has been changed */
 
-      }
-      else
-      {
-    	  //System.out.println("File has not been modified");
       }
 	  
 	  /* Check the message against any send rules */
@@ -308,7 +314,7 @@ public class MessagePasser {
 	  TimeStampedMessage m = receiveMessage();
 	
 	  if (LogMessage) {
-		  if (!LocalName.equals("logger")) {
+		  if (!localName.equals("logger")) {
 			  //Send a duplicate Message to Logger with an updated time stamp.
 			  TimeStampedMessage SendMessage = m.cloneWithUpdatedTimeStamp(clockService.getTimestamp());  
 			
@@ -333,9 +339,9 @@ public class MessagePasser {
 		  if(clockService.getClass().getSimpleName().equals("LogicalClock"))
 			  clockService.increment(0);
 		  else
-			  clockService.increment(nodes.indexOf(findNodeByName(LocalName)));
+			  clockService.increment(nodes.indexOf(findNodeByName(localName)));
 		  
-		  //clockService.increment(nodes.indexOf(findNodeByName(LocalName)));
+		  //clockService.increment(nodes.indexOf(findNodeByName(localName)));
 		  System.out.println("The message is from " + this.rcvQueue.get(0).getSrc() + " to " +
 	  this.rcvQueue.get(0).getDest() + " with ID " + this.rcvQueue.get(0).getId() + 
 	  " TIMESTAMP " + clockService.getTimestamp().getCount());
@@ -348,9 +354,7 @@ public class MessagePasser {
 		  //System.out.println("Waiting start...");
 		  while(this.threadRcvQueue.isEmpty())
 		  {
-		  }
-		  //System.out.println("Waiting over...");
-  
+		  }  
 		  
 		  while(!this.threadRcvQueue.isEmpty())
 		  {
@@ -402,8 +406,7 @@ public class MessagePasser {
 			  if(clockService.getClass().getSimpleName().equals("LogicalClock"))
 				  clockService.increment(0);
 			  else
-				  clockService.increment(nodes.indexOf(findNodeByName(LocalName)));
-			  //System.out.println("The message is from " + this.rcvQueue.get(0).getSrc() + " to " + this.rcvQueue.get(0).getDest() + " with ID " + this.rcvQueue.get(0).getId());
+				  clockService.increment(nodes.indexOf(findNodeByName(localName)));
 			  System.out.println("The message is from " + this.rcvQueue.get(0).getSrc() + " to " +
 					  this.rcvQueue.get(0).getDest() + " with ID " + this.rcvQueue.get(0).getId() + 
 					  " TIMESTAMP " +  clockService.getTimestamp().getCount());
@@ -432,7 +435,6 @@ public class MessagePasser {
   
   void readRules() throws FileNotFoundException
   {
-	  //File f = new File("/Users/Apurva/Desktop/Lab0.yaml.txt");
 	  File f = configFile;
 	  
 	  InputStream input = new FileInputStream (f);
@@ -460,17 +462,12 @@ public class MessagePasser {
 		  }
 	  }
 	  	  
-	  //System.out.println("Send Rules size = "+ sendRules.size()) ;
-	  //System.out.println("Rules = "+ sendRules.get(1).getId()) ;
 	  
-	  
-	  //System.out.println(map.get("ReceiveRules"));
 	  rules = (ArrayList<HashMap>) map.get("ReceiveRules");
 	  if(rules != null)
 	  {
 		  for(int i=0; i < rules.size(); i++)
 		  {
-			  //System.out.println("i = " + i + " action = " + rules.get(i).get("Action"));
 			  Rule r = new Rule((String)rules.get(i).get("Action"),
 					  (String)rules.get(i).get("Src"), 
 					  (String)rules.get(i).get("Dest"),
@@ -483,8 +480,6 @@ public class MessagePasser {
 			  rcvNthCount.put(r, 0);
 		  }
 	  }
-	  //System.out.println("Receive Rules size = "+ receiveRules.size()) ;
-	  //System.out.println("Rules = "+ receiveRules.get(0).getAction()) ;
       this.modificationTime = f.lastModified();
   }
 }
