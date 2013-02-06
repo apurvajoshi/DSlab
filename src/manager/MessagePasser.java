@@ -42,7 +42,7 @@ public class MessagePasser {
   private HashMap<Rule, Integer> rcvNthCount;
   private ArrayList<TimeStampedMessage> sendQueue;
   private ArrayList<TimeStampedMessage> rcvQueue;
-  private List<TimeStampedMessage> threadRcvQueue;
+  public List<TimeStampedMessage> threadRcvQueue;
   private File configFile;  
   
   
