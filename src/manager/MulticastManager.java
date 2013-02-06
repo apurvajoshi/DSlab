@@ -11,10 +11,11 @@ public class MulticastManager {
 	private TimeStampedMessage message;
 	private Timer timer;
 	private ConcurrentHashMap<Node, Integer> ack;	
+	private boolean allAckReceived;
 	
 	public MulticastManager(TimeStampedMessage message) {
-		
 		this.message = message;
+		allAckReceived = false;
 		this.ack = new ConcurrentHashMap<Node, Integer>();
 		for(int i = 0 ; i < MessagePasser.getInstance().nodes.size(); i++)
 		{
@@ -43,7 +44,10 @@ public class MulticastManager {
 	public void setMessage(TimeStampedMessage message) {
 		this.message = message;
 	}
-
+	
+	public boolean ifAllAckReceived() {
+		return allAckReceived;
+	}
 	
 	class UpdateAck extends TimerTask {
 		
@@ -53,21 +57,22 @@ public class MulticastManager {
 
 		@Override
 		public void run() {
-			int cancelTimer = 0;
+			int cancelTimer = 1;
 			System.out.println("Every 5 seconds");
 			for (Entry<Node, Integer> entry : ack.entrySet()) {
 	            System.out.println("Key = " + entry.getKey().getName() + ", Value = " + entry.getValue());
 	            if (entry.getValue().intValue() == 0)
 	            {
-	            	cancelTimer = 1;
+	            	cancelTimer = 0;
 	            	 TimeStampedMessage msg = new TimeStampedMessage(MessagePasser.localName, entry.getKey().getName(), 
 	 	            		"replay", message, message.getTimeStamp());
 	 	            new SenderThread(msg, entry.getKey().getIp(), entry.getKey().getPort(), MessagePasser.clientSockets, msg.getDest());
 	            }
-	            
-	            if(cancelTimer == 1)
-	            	timer.cancel();
 	        }
+			if(cancelTimer == 1) {
+            	allAckReceived = true;
+            	timer.cancel();
+            }
 		}
 	}
 	
