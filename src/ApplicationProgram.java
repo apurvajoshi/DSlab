@@ -8,7 +8,7 @@ public class ApplicationProgram {
 	 * @throws FileNotFoundException 
 	 */
 	
-	/* I AM ALICE */
+	
 	public static void main(String[] args) throws FileNotFoundException {
 		
 	    int input;
