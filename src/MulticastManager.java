@@ -29,6 +29,14 @@ public class MulticastManager {
 		ack.put(node, 1);
 	}
 	
+	public TimeStampedMessage getMessage() {
+		return message;
+	}
+
+	public void setMessage(TimeStampedMessage message) {
+		this.message = message;
+	}
+
 	
 	class UpdateAck extends TimerTask {
 		
