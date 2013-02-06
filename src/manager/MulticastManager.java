@@ -1,25 +1,11 @@
 package manager;
-
-
-
-
-
-
-
-
 import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-
 import model.Node;
 import model.TimeStampedMessage;
-
 import workers.SenderThread;
-
-
-
-
 
 public class MulticastManager {
 	private TimeStampedMessage message;

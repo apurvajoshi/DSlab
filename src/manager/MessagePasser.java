@@ -1,8 +1,4 @@
 package manager;
-
-
-
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -229,7 +225,7 @@ public class MessagePasser {
   {
 	  for(int i = 0; i < nodes.size(); i++)
 	  {
-		this.getClockService().increment(this.nodes.indexOf(this.findNodeByName(localName)));
+		this.getClockService().increment(MessagePasser.nodes.indexOf(this.findNodeByName(localName)));
   		TimeStampedMessage msg = new TimeStampedMessage(localName, nodes.get(i).getName(), "multicast", data, this.getClockService().getTimestamp());
   		send(msg);
 	  }

@@ -2,9 +2,6 @@ package workers;
 import java.net.*;
 import java.util.List;
 import java.io.*;
-
-
-
 import model.TimeStampedMessage;
 
 public class ListenerThread extends Thread{
