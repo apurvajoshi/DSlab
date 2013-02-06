@@ -6,6 +6,7 @@ import java.net.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.*;
+
 import model.TimeStampedMessage;
 
 public class ReceiverThread implements Runnable{
@@ -27,42 +28,41 @@ public class ReceiverThread implements Runnable{
     }
 
     public void run() {
-        
+    	ObjectInputStream is = null;
     	while(true)
     	{
-    		try {            	
-            	ObjectInputStream is = new ObjectInputStream(clientSocket.getInputStream());
-            	
-            	TimeStampedMessage m;
-    			try {
-    				m = (TimeStampedMessage)is.readObject();
-        			if (m != null) {
-        				ProcessMulticastMessage(m);
-        	        	//add to receive buffer
-            			//this.rcvQueue.add(m);
-        	        }
-    			} catch (ClassNotFoundException e) {    				
-    				e.printStackTrace();
-    			}
-            } catch (IOException e) {
-                //report exception somewhere.
-                e.printStackTrace();
-            }
+			try {
+				 
+	    		is = new ObjectInputStream(clientSocket.getInputStream());
+
+				TimeStampedMessage m;
+				m = (TimeStampedMessage) is.readObject();
+				if (m != null) {
+					ProcessMulticastMessage(m);
+				}
+			} catch (Exception e) {
+				try {
+					is.close();
+					clientSocket.close();
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				e.printStackTrace();
+			}
+           
     	}
     }
     
     public void ProcessMulticastMessage(TimeStampedMessage msg) {
-
+    	System.out.println("ProcessMulticastMessage");
     	int msgOrder = msg.getTimeStamp().compare(MessagePasser.getInstance().clockService.getTimestamp());
-
     	
-    	
-		if (msg.getKind().compareTo("ack") != 0) {
-			
+		if (!msg.getKind().equals("ack")) {
 			if (msg.getSrc().equals(MessagePasser.localName)) {
 	    		if(!this.holdQueue.contains(msg.getTimeStamp().getCount().toString()))
 	    			this.holdQueue.put(msg.getTimeStamp().getCount().toString(), new MulticastManager(msg));
-	    		
+	    			System.out.println("Added to hold queue - received from  myself ");
 	    		return;
 	    	}
 			
@@ -77,6 +77,7 @@ public class ReceiverThread implements Runnable{
     				//else new message , add to hold queue
     				System.out.println("New Message received = " + msg.getTimeStamp().getCount().toString());
             		this.holdQueue.put(msg.getTimeStamp().getCount().toString(), new MulticastManager(msg));	
+    				sendMulticastAck(msg);
     			}        		
         	}
         	else if ((msgOrder == 1) || (msgOrder == 0) || (msg.getKind().equals("replay"))) {
@@ -94,13 +95,12 @@ public class ReceiverThread implements Runnable{
     			return; 
     		}
     		else {
-    			if (holdQueue.contains(msg.getTimeStamp())) {
+    			if (holdQueue.contains(msg.getTimeStamp().getCount().toString())) {
     				// New ACK but in hold queue
     				System.out.println("New ACK in hold queue, so update ACK ");
-    				holdQueue.get(msg.getTimeStamp()).setAck(msg.getSrc());
+    				holdQueue.get(msg.getTimeStamp().getCount().toString()).setAck(msg.getSrc());
     				if (holdQueue.get(msg.getTimeStamp().getCount().toString()).ifAllAckReceived())
     				{
-    					
     					while(addThreadRcvQueue() == 1);
     				}
     					
@@ -108,8 +108,12 @@ public class ReceiverThread implements Runnable{
     			else {
     				this.holdQueue.put(msg.getTimeStamp().getCount().toString(), new MulticastManager((TimeStampedMessage)msg.getData()));
     				System.out.println("New Message received through ACK ");
-    				holdQueue.get(msg.getTimeStamp()).setAck(msg.getSrc());
+    				holdQueue.get(msg.getTimeStamp().getCount().toString()).setAck(msg.getSrc());
     				sendMulticastAck((TimeStampedMessage)msg.getData());
+    				if (holdQueue.get(msg.getTimeStamp().getCount().toString()).ifAllAckReceived())
+    				{
+    					while(addThreadRcvQueue() == 1);
+    				}
     			}
     		}
     		
