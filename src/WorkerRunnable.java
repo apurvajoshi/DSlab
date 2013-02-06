@@ -1,16 +1,12 @@
 import java.net.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.*;
 import clock.ClockService;
-import clock.LogicalClock;
-import clock.VectorClock;
 
 public class WorkerRunnable implements Runnable{
 
     protected Socket clientSocket = null;
-	private List<TimeStampedMessage> rcvQueue;
 	private ClockService clockService;
 	private ConcurrentHashMap<String, MulticastManager> holdQueue;
 
@@ -81,11 +77,11 @@ public class WorkerRunnable implements Runnable{
     		}
     		else {
     			if (holdQueue.contains(msg.getTimeStamp())) {
-    				//setAck 
+    				holdQueue.get(msg.getTimeStamp()).setAck(msg.getSrc());
     			}
     			else {
-    				this.holdQueue.put(msg.getTimeStamp().toString(), new MulticastManager(msg.getData()));
-    				sendMulticastAck(msg.getData());
+    				this.holdQueue.put(msg.getTimeStamp().toString(), new MulticastManager((TimeStampedMessage)msg.getData()));
+    				sendMulticastAck((TimeStampedMessage)msg.getData());
     			}
     		}
     		
@@ -97,7 +93,7 @@ public class WorkerRunnable implements Runnable{
   	  for(int i = 0; i < MessagePasser.nodes.size(); i++)
   	  {
     		TimeStampedMessage m = new TimeStampedMessage(MessagePasser.localName, MessagePasser.nodes.get(i).getName(), "ack", msg, msg.getTimeStamp());
-    		MessagePasser.send(m);
+    		MessagePasser.getInstance().send(m);
   	  }
     }
 }

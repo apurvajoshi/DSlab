@@ -16,6 +16,7 @@ import clock.VectorClock;
 
 public class MessagePasser {
 	
+  private static MessagePasser singletonObject;	
   public static ArrayList<Node> nodes;
   public ArrayList<Rule> sendRules;
   public ArrayList<Rule> receiveRules;
@@ -33,7 +34,7 @@ public class MessagePasser {
   private ClockService clockService;
   public static String localName;
   
-  public MessagePasser(String configuration_filename, String local_name)
+  public MessagePasser()
   {
 	  nodes = new ArrayList<Node>();
 	  sendRules = new ArrayList<Rule>();
@@ -44,9 +45,19 @@ public class MessagePasser {
 	  sendQueue = new ArrayList<TimeStampedMessage>();
 	  rcvQueue = new ArrayList<TimeStampedMessage>();
 	  threadRcvQueue = Collections.synchronizedList(new ArrayList<TimeStampedMessage>());
+  }
+  
+ public static MessagePasser getInstance() {
+      
+      if (singletonObject == null)
+          singletonObject = new MessagePasser();
+      
+      return singletonObject;
+  }
+  
+  public void setUp(String configuration_filename, String local_name) {
 	  configFile = new File(configuration_filename);
 	  localName = local_name;
-	  
 	  
 	  try 
 	  {
@@ -57,7 +68,7 @@ public class MessagePasser {
 		  // TODO Auto-generated catch block
 		  e.printStackTrace();
 	  }
-	    
+	  
 	  Node node = findNodeByName(local_name);
 	  if (node == null) 
 	  {
@@ -75,6 +86,7 @@ public class MessagePasser {
 	
 	  }
   }
+  
   
   public Node findNodeByName(String name)
   {    
@@ -202,13 +214,14 @@ public class MessagePasser {
   {
 	  for(int i = 0; i < nodes.size(); i++)
 	  {
+		this.getClockService().increment(this.nodes.indexOf(this.findNodeByName(localName)));
   		TimeStampedMessage msg = new TimeStampedMessage(localName, nodes.get(i).getName(), "multicast", data, this.getClockService().getTimestamp());
   		send(msg);
 	  }
   }
   
  
-  void send(TimeStampedMessage message)
+   void send(TimeStampedMessage message)
   {	  
 	  /* Set the id of the message before sending it */
 	  message.setId(MessagePasser.ID);
