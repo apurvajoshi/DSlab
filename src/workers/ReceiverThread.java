@@ -2,9 +2,11 @@ package workers;
 import manager.MessagePasser;
 import manager.MulticastManager;
 import java.net.*;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.*;
 
+import model.Node;
 import model.TimeStampedMessage;
 
 public class ReceiverThread implements Runnable{
@@ -60,11 +62,13 @@ public class ReceiverThread implements Runnable{
     			if (holdQueue.containsKey(msg.getTimeStamp().toString())) {
     				//Duplicate message, already exists in hashmap
     				sendMulticastAck(msg);
+    			}  
+    			else {
+    				//else new message , add to hold queue
+            		this.holdQueue.put(msg.getTimeStamp().toString(), new MulticastManager(msg));	
     			}        		
-        		//else new message , add to hold queue
-        		this.holdQueue.put(msg.getTimeStamp().toString(), new MulticastManager(msg));
         	}
-        	else if (msgOrder == 1) {
+        	else if ((msgOrder == 1) || (msgOrder == 0) || (msg.getKind().equals("replay"))) {
         		//Old Message    	
         		sendMulticastAck(msg);
         	}    		
@@ -96,5 +100,13 @@ public class ReceiverThread implements Runnable{
     		TimeStampedMessage m = new TimeStampedMessage(MessagePasser.localName, MessagePasser.getInstance().nodes.get(i).getName(), "ack", msg, msg.getTimeStamp());
     		MessagePasser.getInstance().send(m);
   	  }
+    }
+    
+    public void addThreadRcvQueue() {
+    	for (Entry<String, MulticastManager> entry : holdQueue.entrySet()) {
+    		if (entry.getValue().
+    			if (entry.getValue().getMessage().getSrc().equals(MessagePasser.localName))
+    		}
+    	}
     }
 }
