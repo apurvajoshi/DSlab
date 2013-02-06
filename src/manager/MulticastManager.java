@@ -1,7 +1,25 @@
+package manager;
+
+
+
+
+
+
+
+
 import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+
+import model.Node;
+import model.TimeStampedMessage;
+
+import workers.SenderThread;
+
+
+
+
 
 public class MulticastManager {
 	private TimeStampedMessage message;
@@ -55,7 +73,7 @@ public class MulticastManager {
 	            	cancelTimer = 1;
 	            	 TimeStampedMessage msg = new TimeStampedMessage(MessagePasser.localName, entry.getKey().getName(), 
 	 	            		"replay", message, message.getTimeStamp());
-	 	            new SetupClientSocket(msg, entry.getKey().getIp(), entry.getKey().getPort(), MessagePasser.clientSockets, msg.getDest());
+	 	            new SenderThread(msg, entry.getKey().getIp(), entry.getKey().getPort(), MessagePasser.clientSockets, msg.getDest());
 	            }
 	            
 	            if(cancelTimer == 1)

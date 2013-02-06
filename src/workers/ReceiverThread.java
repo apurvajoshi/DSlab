@@ -1,16 +1,19 @@
+package workers;
 import java.net.*;
 import java.util.List;
 import java.io.*;
+
+import model.TimeStampedMessage;
 import clock.ClockService;
 import clock.LogicalClock;
 import clock.VectorClock;
 
-public class WorkerRunnable implements Runnable{
+public class ReceiverThread implements Runnable{
 
     protected Socket clientSocket = null;
 	private List<TimeStampedMessage> rcvQueue;
 
-    public WorkerRunnable(Socket clientSocket, List<TimeStampedMessage> queue) {
+    public ReceiverThread(Socket clientSocket, List<TimeStampedMessage> queue) {
         this.clientSocket = clientSocket;
         this.rcvQueue = queue;
         try {

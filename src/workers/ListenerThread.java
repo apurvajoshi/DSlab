@@ -1,14 +1,19 @@
+package workers;
 import java.net.*;
 import java.util.List;
 import java.io.*;
 
-public class SetupServerSocket extends Thread{
+
+
+import model.TimeStampedMessage;
+
+public class ListenerThread extends Thread{
 	  
 	  private ServerSocket Server = null;
 	  private Socket clientSocket = null;
 	  private List<TimeStampedMessage> rcvQueue;
 
-	  public SetupServerSocket(int port, List<TimeStampedMessage> queue ) throws IOException
+	  public ListenerThread(int port, List<TimeStampedMessage> queue ) throws IOException
 	  {
 		  this.rcvQueue = queue;
 		  System.out.println("port is " + port);
@@ -40,7 +45,7 @@ public class SetupServerSocket extends Thread{
 		      }
 			  
 			  new Thread(
-					  new WorkerRunnable(clientSocket, this.rcvQueue)
+					  new ReceiverThread(clientSocket, this.rcvQueue)
 					  ).start();
 		  }
 	  }  
