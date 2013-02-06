@@ -58,7 +58,7 @@ public class ApplicationProgram {
     	        		if(m.getClockService().getClass().getSimpleName().equals("LogicalClock"))
     	        			m.getClockService().increment(0);
     	        		else
-    	        			m.getClockService().increment(MessagePasser.nodes.indexOf(m.findNodeByName(args[1])));
+    	        			m.getClockService().increment(MessagePasser.getInstance().nodes.indexOf(m.findNodeByName(args[1])));
     	        		TimeStampedMessage msg = new TimeStampedMessage(args[1], dest, kind, data, m.getClockService().getTimestamp());
     	        		m.send(msg);
     	        		break;
@@ -70,7 +70,7 @@ public class ApplicationProgram {
     	        case 5: if(m.getClockService().getClass().getSimpleName().equals("LogicalClock"))    	        		
         					m.getClockService().increment(0);
         				else
-        					m.getClockService().increment(MessagePasser.nodes.indexOf(m.findNodeByName(args[1])));
+        					m.getClockService().increment(MessagePasser.getInstance().nodes.indexOf(m.findNodeByName(args[1])));
     	        
     	        		System.out.println("Sent Dummy Event\n");
     	        		System.out.println(" TIMESTAMP " + m.getClockService().getTimestamp().getCount() + "\n");

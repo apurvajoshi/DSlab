@@ -1,21 +1,24 @@
 package workers;
+import manager.MessagePasser;
+import manager.MulticastManager;
 import java.net.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.io.*;
 
 import model.TimeStampedMessage;
-import clock.ClockService;
-import clock.LogicalClock;
-import clock.VectorClock;
 
 public class ReceiverThread implements Runnable{
 
     protected Socket clientSocket = null;
-	private List<TimeStampedMessage> rcvQueue;
+	
+	private ConcurrentHashMap<String, MulticastManager> holdQueue;
 
     public ReceiverThread(Socket clientSocket, List<TimeStampedMessage> queue) {
-        this.clientSocket = clientSocket;
-        this.rcvQueue = queue;
+
+		holdQueue = new ConcurrentHashMap<String, MulticastManager> ();
+        this.clientSocket = clientSocket;        
+        
         try {
 			this.clientSocket.setKeepAlive(true);
 		} catch (SocketException e) {
@@ -50,6 +53,55 @@ public class ReceiverThread implements Runnable{
     }
     
     public void ProcessMulticastMessage(TimeStampedMessage msg) {
+
+    	int msgOrder = msg.getTimeStamp().compare(MessagePasser.getInstance().clockService.getTimestamp());
     	
+    	if (msg.getKind().compareTo("ack") != 0) {
+    		
+    		if (msg.getSrc().equals(MessagePasser.getInstance().localName)) {
+    			return; //Drop messages from yourself
+    		}
+    		
+    		if (msgOrder == 2) {
+        		//New Timestamp
+    			if (holdQueue.containsKey(msg.getTimeStamp().toString())) {
+    				//Duplicate message, already exists in hashmap
+    				sendMulticastAck(msg);
+    			}        		
+        		//else new message , add to hold queue
+        		this.holdQueue.put(msg.getTimeStamp().toString(), new MulticastManager(msg));
+        	}
+        	else if (msgOrder == 1) {
+        		//Old Message    	
+        		sendMulticastAck(msg);
+        	}    		
+    	}
+    	else {
+    		//Ack
+    		// If Ack is <= Current Timestamp or if I am the source, drop it.
+    		if (((msgOrder == 0) || (msgOrder == 1)) || (msg.getSrc().equals(MessagePasser.localName))) {
+    			//drop message
+    			return; 
+    		}
+    		else {
+    			if (holdQueue.contains(msg.getTimeStamp())) {
+    				holdQueue.get(msg.getTimeStamp()).setAck(msg.getSrc());
+    			}
+    			else {
+    				this.holdQueue.put(msg.getTimeStamp().toString(), new MulticastManager((TimeStampedMessage)msg.getData()));
+    				sendMulticastAck((TimeStampedMessage)msg.getData());
+    			}
+    		}
+    		
+    	}	
+    }
+    
+    public void sendMulticastAck(TimeStampedMessage msg)
+    {
+  	  for(int i = 0; i < MessagePasser.getInstance().nodes.size(); i++)
+  	  {
+    		TimeStampedMessage m = new TimeStampedMessage(MessagePasser.localName, MessagePasser.getInstance().nodes.get(i).getName(), "ack", msg, msg.getTimeStamp());
+    		MessagePasser.getInstance().send(m);
+  	  }
     }
 }

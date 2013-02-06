@@ -4,17 +4,16 @@ import java.util.List;
 import java.io.*;
 import model.TimeStampedMessage;
 
-public class ListenerThread extends Thread{
-	  
-	  private ServerSocket Server = null;
-	  private Socket clientSocket = null;
-	  private List<TimeStampedMessage> rcvQueue;
+public class ListenerThread extends Thread {
+	private ServerSocket Server = null;
+	private Socket clientSocket = null;
+	private List<TimeStampedMessage> rcvQueue;
 
-	  public ListenerThread(int port, List<TimeStampedMessage> queue ) throws IOException
-	  {
+	public ListenerThread(int port, List<TimeStampedMessage> queue ) throws IOException 
+	{
 		  this.rcvQueue = queue;
 		  System.out.println("port is " + port);
-		// Should not use a well-defined port number
+		  // Should not use a well-defined port number
 		  if (port < 1025) {
 			  System.err.println("Invalid port number: " + port);
 		  }

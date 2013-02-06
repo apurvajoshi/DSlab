@@ -16,12 +16,15 @@ public class MulticastManager {
 		
 		this.message = message;
 		this.ack = new ConcurrentHashMap<Node, Integer>();
-		for(int i = 0 ; i < MessagePasser.nodes.size(); i++)
+		for(int i = 0 ; i < MessagePasser.getInstance().nodes.size(); i++)
 		{
-			ack.put(MessagePasser.nodes.get(i), 0);
+			ack.put(MessagePasser.getInstance().nodes.get(i), 0);
 		}
-		timer = new Timer();
 		
+		setAck(message.getSrc());
+		setAck(MessagePasser.localName);
+		
+		timer = new Timer();
 	}
 	
 	public void runTimer() {

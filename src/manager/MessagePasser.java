@@ -28,11 +28,13 @@ import clock.VectorClock;
 public class MessagePasser {
 	
   private static MessagePasser singletonObject;	
-  public static ArrayList<Node> nodes;
+  public ArrayList<Node> nodes;
   public ArrayList<Rule> sendRules;
   public ArrayList<Rule> receiveRules;
   public static HashMap<String, Socket> clientSockets;
   public boolean LogMessage = false;
+  public ClockService clockService;
+  public static String localName;
 
   private static Integer ID = 1;
   private long modificationTime;
@@ -41,9 +43,8 @@ public class MessagePasser {
   private ArrayList<TimeStampedMessage> sendQueue;
   private ArrayList<TimeStampedMessage> rcvQueue;
   private List<TimeStampedMessage> threadRcvQueue;
-  private File configFile;
-  private ClockService clockService;
-  public static String localName;
+  private File configFile;  
+  
   
   public MessagePasser()
   {
@@ -89,6 +90,7 @@ public class MessagePasser {
 	  try
 	  {
 		  Thread t = new ListenerThread(node.getPort(), this.threadRcvQueue);
+
 		  t.start();
 	  } 
 	  catch(IOException e)
@@ -225,7 +227,7 @@ public class MessagePasser {
   {
 	  for(int i = 0; i < nodes.size(); i++)
 	  {
-		this.getClockService().increment(MessagePasser.nodes.indexOf(this.findNodeByName(localName)));
+		this.getClockService().increment(MessagePasser.getInstance().nodes.indexOf(this.findNodeByName(localName)));
   		TimeStampedMessage msg = new TimeStampedMessage(localName, nodes.get(i).getName(), "multicast", data, this.getClockService().getTimestamp());
   		send(msg);
 	  }
@@ -238,8 +240,7 @@ public class MessagePasser {
 	  message.setId(MessagePasser.ID);
 	  MessagePasser.ID++;
 	  	  
-	  /* Reread the configuration file if the modification time has been changed*/
-	  //File f = new File("/Users/Apurva/Desktop/Lab0.yaml.txt");
+	  /* Reread the configuration file if the modification time has been changed*/	  
 	  File f = configFile;	  
 	  
       if(this.modificationTime != f.lastModified())
