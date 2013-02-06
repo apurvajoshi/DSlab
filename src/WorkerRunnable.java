@@ -47,7 +47,6 @@ public class WorkerRunnable implements Runnable{
     }
     
     public void ProcessMulticastMessage(TimeStampedMessage msg) {
-    	msg.
     	
     }
 }
