@@ -7,8 +7,7 @@ public class ApplicationProgram {
 	 * @param args
 	 * @throws FileNotFoundException 
 	 */
-	
-	
+		
 	public static void main(String[] args) throws FileNotFoundException {
 		
 	    int input;
