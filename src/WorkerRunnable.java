@@ -52,6 +52,7 @@ public class WorkerRunnable implements Runnable{
     }
     
     public void ProcessMulticastMessage(TimeStampedMessage msg) {
+
     	int msgOrder = msg.getTimeStamp().compare(this.clockService.getTimestamp());
     	
     	if (msg.getKind().compareTo("ack") != 0) { 
@@ -72,8 +73,6 @@ public class WorkerRunnable implements Runnable{
     			//drop message
     			return; 
     		}
-    	}
-    	
-    	
+    	}	
     }
 }
