@@ -16,7 +16,7 @@ import clock.VectorClock;
 
 public class MessagePasser {
 	
-  public ArrayList<Node> nodes;
+  public static ArrayList<Node> nodes;
   public ArrayList<Rule> sendRules;
   public ArrayList<Rule> receiveRules;
   public static HashMap<String, Socket> clientSockets;
@@ -214,8 +214,7 @@ public class MessagePasser {
 	  message.setId(MessagePasser.ID);
 	  MessagePasser.ID++;
 	  	  
-	  /* Reread the configuration file if the modification time has been changed*/
-	  //File f = new File("/Users/Apurva/Desktop/Lab0.yaml.txt");
+	  /* Reread the configuration file if the modification time has been changed*/	  
 	  File f = configFile;	  
 	  
       if(this.modificationTime != f.lastModified())

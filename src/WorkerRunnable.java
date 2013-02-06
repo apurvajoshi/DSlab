@@ -1,6 +1,7 @@
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.io.*;
 import clock.ClockService;
 import clock.LogicalClock;
@@ -11,9 +12,10 @@ public class WorkerRunnable implements Runnable{
     protected Socket clientSocket = null;
 	private List<TimeStampedMessage> rcvQueue;
 	private ClockService clockService;
-	private ArrayList<TimeStampedMessage> holdQueue;
+	private ConcurrentHashMap<String, MulticastManager> holdQueue;
 
     public WorkerRunnable(Socket clientSocket, List<TimeStampedMessage> queue, ClockService clockService) {
+    	holdQueue = new ConcurrentHashMap<String, MulticastManager> ();
         this.clientSocket = clientSocket;
         this.clockService = clockService;
         
@@ -58,21 +60,44 @@ public class WorkerRunnable implements Runnable{
     	if (msg.getKind().compareTo("ack") != 0) { 
     		if (msgOrder == 2) {
         		//New Timestamp
-        		//if exists in hashmap -- duplicate
-        		//else new
-        		//add to hold queue
-        		this.holdQueue.add(msg);
+    			if (holdQueue.containsKey(msg.getTimeStamp().toString())) {
+    				//Duplicate message, already exists in hashmap
+    				sendMulticastAck(msg);
+    			}        		
+        		//else new message , add to hold queue
+        		this.holdQueue.put(msg.getTimeStamp().toString(), new MulticastManager(msg));
         	}
         	else if (msgOrder == 1) {
-        		//Old Message    		
+        		//Old Message    	
+        		sendMulticastAck(msg);
         	}    		
     	}
     	else {
     		//Ack
-    		if ((msgOrder == 0) || (msgOrder == 1)) {
+    		// If Ack is <= Current Timestamp or if I am the source, drop it.
+    		if (((msgOrder == 0) || (msgOrder == 1)) || (msg.getSrc().equals(MessagePasser.localName))) {
     			//drop message
     			return; 
     		}
+    		else {
+    			if (holdQueue.contains(msg.getTimeStamp())) {
+    				//setAck 
+    			}
+    			else {
+    				this.holdQueue.put(msg.getTimeStamp().toString(), new MulticastManager(msg.getData()));
+    				sendMulticastAck(msg.getData());
+    			}
+    		}
+    		
     	}	
+    }
+    
+    public void sendMulticastAck(TimeStampedMessage msg)
+    {
+  	  for(int i = 0; i < MessagePasser.nodes.size(); i++)
+  	  {
+    		TimeStampedMessage m = new TimeStampedMessage(MessagePasser.localName, MessagePasser.nodes.get(i).getName(), "ack", msg, msg.getTimeStamp());
+    		MessagePasser.send(m);
+  	  }
     }
 }
