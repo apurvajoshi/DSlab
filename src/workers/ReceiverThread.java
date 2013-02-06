@@ -56,7 +56,12 @@ public class ReceiverThread implements Runnable{
 
     	int msgOrder = msg.getTimeStamp().compare(MessagePasser.getInstance().clockService.getTimestamp());
     	
-    	if (msg.getKind().compareTo("ack") != 0) { 
+    	if (msg.getKind().compareTo("ack") != 0) {
+    		
+    		if (msg.getSrc().equals(MessagePasser.getInstance().localName)) {
+    			return; //Drop messages from yourself
+    		}
+    		
     		if (msgOrder == 2) {
         		//New Timestamp
     			if (holdQueue.containsKey(msg.getTimeStamp().toString())) {
