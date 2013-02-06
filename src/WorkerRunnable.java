@@ -1,6 +1,9 @@
 import java.net.*;
 import java.util.List;
 import java.io.*;
+import clock.ClockService;
+import clock.LogicalClock;
+import clock.VectorClock;
 
 public class WorkerRunnable implements Runnable{
 
@@ -22,22 +25,18 @@ public class WorkerRunnable implements Runnable{
         
     	while(true)
     	{
-    		try {
-            	
+    		try {            	
             	ObjectInputStream is = new ObjectInputStream(clientSocket.getInputStream());
-            	//Message m;
+            	
             	TimeStampedMessage m;
     			try {
-    				//m = (Message)is.readObject();
     				m = (TimeStampedMessage)is.readObject();
         			if (m != null) {
-        	        	//System.out.println("Source: " + m.getSrc());
-        	        	
+        				ProcessMulticastMessage(m);
         	        	//add to receive buffer
-            			this.rcvQueue.add(m);
+            			//this.rcvQueue.add(m);
         	        }
-    			} catch (ClassNotFoundException e) {
-    				// TODO Auto-generated catch block
+    			} catch (ClassNotFoundException e) {    				
     				e.printStackTrace();
     			}
             } catch (IOException e) {
@@ -45,6 +44,10 @@ public class WorkerRunnable implements Runnable{
                 e.printStackTrace();
             }
     	}
+    }
+    
+    public void ProcessMulticastMessage(TimeStampedMessage msg) {
+    	msg.
     	
     }
 }
