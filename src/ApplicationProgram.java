@@ -15,7 +15,8 @@ public class ApplicationProgram {
  	    //System.out.println("arg[0] = " + args[0]);
 	    
 	    System.out.println("Hi! This is " + args[1] + "\n");
-	    MessagePasser m = new MessagePasser(args[0], args[1]);
+	    MessagePasser m = MessagePasser.getInstance(); 
+	    m.setUp(args[0], args[1]);
 	    	   
         Scanner inputReader = new Scanner(System.in);
         
