@@ -1,4 +1,11 @@
+package workers;
+
+
 import java.util.List;
+
+import manager.MessagePasser;
+import model.TimeStampedMessage;
+
 
 public class LoggerRunnable implements Runnable{
 

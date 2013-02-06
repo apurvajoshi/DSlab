@@ -1,3 +1,8 @@
+package manager;
+
+
+
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,7 +14,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+
+import model.Node;
+import model.Rule;
+import model.TimeStampedMessage;
+
 import org.yaml.snakeyaml.Yaml;
+
+import workers.ListenerThread;
+import workers.SenderThread;
+
 import clock.ClockService;
 import clock.LogicalClock;
 import clock.VectorClock;
@@ -17,11 +32,13 @@ import clock.VectorClock;
 public class MessagePasser {
 	
   private static MessagePasser singletonObject;	
-  public static ArrayList<Node> nodes;
+  public ArrayList<Node> nodes;
   public ArrayList<Rule> sendRules;
   public ArrayList<Rule> receiveRules;
   public static HashMap<String, Socket> clientSockets;
   public boolean LogMessage = false;
+  public ClockService clockService;
+  public static String localName;
 
   private static Integer ID = 1;
   private long modificationTime;
@@ -30,9 +47,8 @@ public class MessagePasser {
   private ArrayList<TimeStampedMessage> sendQueue;
   private ArrayList<TimeStampedMessage> rcvQueue;
   private List<TimeStampedMessage> threadRcvQueue;
-  private File configFile;
-  private ClockService clockService;
-  public static String localName;
+  private File configFile;  
+  
   
   public MessagePasser()
   {
@@ -77,7 +93,8 @@ public class MessagePasser {
 		  
 	  try
 	  {
-		  Thread t = new SetupServerSocket(node.getPort(), this.threadRcvQueue, this.clockService);
+		  Thread t = new ListenerThread(node.getPort(), this.threadRcvQueue);
+
 		  t.start();
 	  } 
 	  catch(IOException e)
@@ -221,7 +238,7 @@ public class MessagePasser {
   }
   
  
-   void send(TimeStampedMessage message)
+   public void send(TimeStampedMessage message)
   {	  
 	  /* Set the id of the message before sending it */
 	  message.setId(MessagePasser.ID);
@@ -311,18 +328,18 @@ public class MessagePasser {
   void sendViaSocket(TimeStampedMessage message)
   {
 	  Node node = findNodeByName(message.getDest());
-	  new SetupClientSocket(message, node.getIp(), node.getPort(), clientSockets, message.getDest());
+	  new SenderThread(message, node.getIp(), node.getPort(), clientSockets, message.getDest());
 	  
 	  if (LogMessage) {
 		  //Send a duplicate Message to Logger
 		  node = findNodeByName("logger");
 		  //System.out.println("Sending to node with ip " + node.getIp() + " " + node.getPort());
 		  //message.setDest("logger");
-		  new SetupClientSocket(message, node.getIp(), node.getPort(), clientSockets, "logger");		  		  
+		  new SenderThread(message, node.getIp(), node.getPort(), clientSockets, "logger");		  		  
 	  }	  
   }
   
-  TimeStampedMessage receive( ) {
+  public TimeStampedMessage receive( ) {
 	  TimeStampedMessage m = receiveMessage();
 	
 	  if (LogMessage) {
@@ -331,7 +348,7 @@ public class MessagePasser {
 			  TimeStampedMessage SendMessage = m.cloneWithUpdatedTimeStamp(clockService.getTimestamp());  
 			
 			  Node node = findNodeByName("logger");	  
-			  new SetupClientSocket(SendMessage, node.getIp(), node.getPort(), clientSockets, "logger");
+			  new SenderThread(SendMessage, node.getIp(), node.getPort(), clientSockets, "logger");
 		  }		  
 	  }	  
 	    

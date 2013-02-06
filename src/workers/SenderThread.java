@@ -1,12 +1,15 @@
+package workers;
 import java.net.*;
 import java.util.HashMap;
 import java.io.*;
 
-public class SetupClientSocket {
+import model.TimeStampedMessage;
+
+public class SenderThread {
   
 	  Socket clientSocket = null;  
 
-      public SetupClientSocket(TimeStampedMessage message, String ip, int port, HashMap<String, Socket> clientSockets, String Dest)
+      public SenderThread(TimeStampedMessage message, String ip, int port, HashMap<String, Socket> clientSockets, String Dest)
       {
     	  
     	  //System.out.println("Client: Connecting to " + ip + " on port " + port);

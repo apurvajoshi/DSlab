@@ -1,21 +1,24 @@
+package workers;
+import manager.MessagePasser;
+import manager.MulticastManager;
 import java.net.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.*;
-import clock.ClockService;
 
-public class WorkerRunnable implements Runnable{
+import model.TimeStampedMessage;
+
+public class ReceiverThread implements Runnable{
 
     protected Socket clientSocket = null;
-	private ClockService clockService;
+	
 	private ConcurrentHashMap<String, MulticastManager> holdQueue;
 
-    public WorkerRunnable(Socket clientSocket, List<TimeStampedMessage> queue, ClockService clockService) {
-    	holdQueue = new ConcurrentHashMap<String, MulticastManager> ();
-        this.clientSocket = clientSocket;
-        this.clockService = clockService;
+    public ReceiverThread(Socket clientSocket, List<TimeStampedMessage> queue) {
+
+		holdQueue = new ConcurrentHashMap<String, MulticastManager> ();
+        this.clientSocket = clientSocket;        
         
-        this.rcvQueue = queue;
         try {
 			this.clientSocket.setKeepAlive(true);
 		} catch (SocketException e) {
@@ -51,7 +54,7 @@ public class WorkerRunnable implements Runnable{
     
     public void ProcessMulticastMessage(TimeStampedMessage msg) {
 
-    	int msgOrder = msg.getTimeStamp().compare(this.clockService.getTimestamp());
+    	int msgOrder = msg.getTimeStamp().compare(MessagePasser.getInstance().clockService.getTimestamp());
     	
     	if (msg.getKind().compareTo("ack") != 0) { 
     		if (msgOrder == 2) {
@@ -90,9 +93,9 @@ public class WorkerRunnable implements Runnable{
     
     public void sendMulticastAck(TimeStampedMessage msg)
     {
-  	  for(int i = 0; i < MessagePasser.nodes.size(); i++)
+  	  for(int i = 0; i < MessagePasser.getInstance().nodes.size(); i++)
   	  {
-    		TimeStampedMessage m = new TimeStampedMessage(MessagePasser.localName, MessagePasser.nodes.get(i).getName(), "ack", msg, msg.getTimeStamp());
+    		TimeStampedMessage m = new TimeStampedMessage(MessagePasser.localName, MessagePasser.getInstance().nodes.get(i).getName(), "ack", msg, msg.getTimeStamp());
     		MessagePasser.getInstance().send(m);
   	  }
     }

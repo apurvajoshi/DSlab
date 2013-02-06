@@ -1,6 +1,10 @@
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+import manager.MessagePasser;
+import model.TimeStampedMessage;
+
+
 public class ApplicationProgram {
 
 	/**

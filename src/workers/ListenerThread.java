@@ -1,23 +1,19 @@
+package workers;
 import java.net.*;
 import java.util.List;
 import java.io.*;
+import model.TimeStampedMessage;
 
-import clock.ClockService;
+public class ListenerThread extends Thread {
+	private ServerSocket Server = null;
+	private Socket clientSocket = null;
+	private List<TimeStampedMessage> rcvQueue;
 
-public class SetupServerSocket extends Thread{
-	  
-	  private ServerSocket Server = null;
-	  private Socket clientSocket = null;
-	  private List<TimeStampedMessage> rcvQueue;
-	  private ClockService clockService;
-
-	  public SetupServerSocket(int port, List<TimeStampedMessage> queue, ClockService clockService) throws IOException
-	  {
+	public ListenerThread(int port, List<TimeStampedMessage> queue ) throws IOException 
+	{
 		  this.rcvQueue = queue;
-		  this.clockService  = clockService;
-		  
 		  System.out.println("port is " + port);
-		// Should not use a well-defined port number
+		  // Should not use a well-defined port number
 		  if (port < 1025) {
 			  System.err.println("Invalid port number: " + port);
 		  }
@@ -45,7 +41,7 @@ public class SetupServerSocket extends Thread{
 		      }
 			  
 			  new Thread(
-					  new WorkerRunnable(clientSocket, this.rcvQueue, this.clockService)
+					  new ReceiverThread(clientSocket, this.rcvQueue)
 					  ).start();
 		  }
 	  }  
