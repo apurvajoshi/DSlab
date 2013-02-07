@@ -226,12 +226,12 @@ public class MessagePasser {
   }
   
   
-  public void sendMulticastMessage(Object data)
+  public void sendMulticastMessage(TimeStampedMessage m)
   {
 	  //this.getClockService().increment(MessagePasser.getInstance().nodes.indexOf(this.findNodeByName(localName)));
 	  for(int i = 0; i < nodes.size(); i++)
 	  {
-  		TimeStampedMessage msg = new TimeStampedMessage(localName, nodes.get(i).getName(), "multicast", data, this.getClockService().getTimestamp());
+  		TimeStampedMessage msg = new TimeStampedMessage(localName, nodes.get(i).getName(), m.getKind(), m.getData(), this.getClockService().getTimestamp());
   		send(msg);
 	  }
   }
@@ -273,7 +273,7 @@ public class MessagePasser {
     	  if(sendRules.get(rule).getAction().equals("drop"))
     	  { 
     		  /* Just ignore */
-			  System.out.println("Droping message with id " + message.getId());
+			  System.out.println("Dropping message with id " + message.getId());
     		  return;
     	  }
     	  else if(sendRules.get(rule).getAction().equals("duplicate"))
