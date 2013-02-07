@@ -11,7 +11,14 @@ public class TimeStamp implements Serializable {
 	public TimeStamp() {
 		count = new ArrayList<Integer>();
 	}
-	
+
+	public TimeStamp(TimeStamp t) {
+		count = new ArrayList<Integer>();
+		for (int i = 0; i < t.getCount().size(); i++) {
+			this.count.add(t.getCount().get(i));
+		}
+	}
+		
 	public ArrayList<Integer> getCount() {
 		return count;
 	}
