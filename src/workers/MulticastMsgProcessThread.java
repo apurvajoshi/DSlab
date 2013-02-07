@@ -1,5 +1,7 @@
 package workers;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,7 +14,6 @@ public class MulticastMsgProcessThread extends Thread {
 
 	private ConcurrentHashMap<String, MulticastManager> holdQueue;
 	private List<TimeStampedMessage> threadRcvQueue;
-
 
 	public MulticastMsgProcessThread(List<TimeStampedMessage> threadRcvQueue) throws IOException {
 		holdQueue = new ConcurrentHashMap<String, MulticastManager>();
@@ -28,7 +29,9 @@ public class MulticastMsgProcessThread extends Thread {
 			while(!this.threadRcvQueue.isEmpty())
 			{
 				TimeStampedMessage m = this.threadRcvQueue.remove(0);
-				ProcessMulticastMessage(m);
+				MessagePasser.getInstance().addToProcessQueue(m);
+				while(!MessagePasser.getInstance().processQueue.isEmpty())
+					ProcessMulticastMessage(MessagePasser.getInstance().processQueue.remove(0));
 			}
 		}
 	}
@@ -185,7 +188,10 @@ public class MulticastMsgProcessThread extends Thread {
 
 						TimeStampedMessage m = holdQueue.remove(entry.getKey())
 								.getMessage();
-						MessagePasser.getInstance().addToRcvQueue(m);
+						MessagePasser.getInstance().clockService.resyncTimeStamp(m.getTimeStamp());
+						MessagePasser.getInstance().rcvQueue.add(m);
+
+						//MessagePasser.getInstance().addToRcvQueue(m);
 						return 1;
 					}
 
