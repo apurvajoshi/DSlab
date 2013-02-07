@@ -29,36 +29,35 @@ public class ReceiverThread implements Runnable{
 
     public void run() {
     	ObjectInputStream is = null;
-    	while(true)
-    	{
-			try {
-				 
-	    		is = new ObjectInputStream(clientSocket.getInputStream());
-
+    	try {
+			while (true) {
+				is = new ObjectInputStream(clientSocket.getInputStream());
 				TimeStampedMessage m;
 				m = (TimeStampedMessage) is.readObject();
 				if (m != null) {
 					ProcessMulticastMessage(m);
 				}
-			} catch (Exception e) {
-				try {
-					is.close();
-					clientSocket.close();
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				e.printStackTrace();
 			}
-           
-    	}
+    	} catch (Exception e) {
+			try {
+	    		is.close();
+				clientSocket.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				//e1.printStackTrace();
+			}
+    		//e.printStackTrace();
+		}
     }
     
     public void ProcessMulticastMessage(TimeStampedMessage msg) {
     	System.out.println("ProcessMulticastMessage");
     	int msgOrder = msg.getTimeStamp().compare(MessagePasser.getInstance().clockService.getTimestamp());
     	
+    	System.out.println("msg order = " + msgOrder);
+    	
 		if (!msg.getKind().equals("ack")) {
+			System.out.println("Not an ack");
 			if (msg.getSrc().equals(MessagePasser.localName)) {
 	    		if(!this.holdQueue.contains(msg.getTimeStamp().getCount().toString()))
 	    			this.holdQueue.put(msg.getTimeStamp().getCount().toString(), new MulticastManager(msg));
@@ -87,6 +86,8 @@ public class ReceiverThread implements Runnable{
         	}    		
     	}
     	else {
+    		
+    		System.out.println("An ack");
     		//Ack
     		// If Ack is <= Current Timestamp or if I am the source, drop it.
     		if (((msgOrder == 0) || (msgOrder == 1)) || (msg.getSrc().equals(MessagePasser.localName))) {
@@ -122,6 +123,7 @@ public class ReceiverThread implements Runnable{
     
     public void sendMulticastAck(TimeStampedMessage msg)
     {
+      System.out.println("Multicasting ACK");
   	  for(int i = 0; i < MessagePasser.getInstance().nodes.size(); i++)
   	  {
     		TimeStampedMessage m = new TimeStampedMessage(MessagePasser.localName, MessagePasser.getInstance().nodes.get(i).getName(), "ack", msg, msg.getTimeStamp());
@@ -132,11 +134,15 @@ public class ReceiverThread implements Runnable{
     public int addThreadRcvQueue() {
     	for (Entry<String, MulticastManager> entry : holdQueue.entrySet()) {
     		if (entry.getValue().ifAllAckReceived()) {
+    			System.out.println("All acks received");
     			if (entry.getValue().getMessage().getSrc().equals(MessagePasser.localName)) {
     				holdQueue.remove(entry.getKey());
+    				System.out.println("Drop message because I was the sender of the message");
     			}
     			else {
     				if (inorder(entry.getValue().getMessage())) {
+        				System.out.println("Message inorder - so move it to threadRcvQueue");
+
         				TimeStampedMessage m = holdQueue.remove(entry.getKey()).getMessage(); 
         				MessagePasser.getInstance().threadRcvQueue.add(m);
         				return 1;
