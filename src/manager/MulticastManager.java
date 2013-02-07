@@ -10,11 +10,9 @@ public class MulticastManager {
 	private TimeStampedMessage message;
 	private Timer timer;
 	private ConcurrentHashMap<Node, Integer> ack;	
-	private boolean allAckReceived;
 	
 	public MulticastManager(TimeStampedMessage message) {
 		this.message = message;
-		allAckReceived = false;
 		this.ack = new ConcurrentHashMap<Node, Integer>();
 		for(int i = 0 ; i < MessagePasser.getInstance().nodes.size(); i++)
 		{
@@ -25,8 +23,8 @@ public class MulticastManager {
 		setAck(MessagePasser.localName);
 		
 		timer = new Timer();
-		this.timer.schedule(new UpdateAck(), 5*1000, 5*1000);
-		//this.timer.scheduleAtFixedRate( new UpdateAck(), 5*1000,5*1000);
+		//this.timer.schedule(new UpdateAck(), 5*1000, 5*1000);
+		this.timer.scheduleAtFixedRate( new UpdateAck(), 2*1000,5*1000);
 	}
 	
 	public void runTimer() {
@@ -55,8 +53,6 @@ public class MulticastManager {
             }
         }
 		return true;
-		//return allAckReceived;
-
 	}
 	
 	class UpdateAck extends TimerTask {
@@ -79,10 +75,8 @@ public class MulticastManager {
 	            	 MessagePasser.getInstance().send(msg);
 	            }
 	        }
-			if(cancelTimer == 1) {
-            	allAckReceived = true;
+			if(cancelTimer == 1) 
             	timer.cancel();
-            }
 		}
 	}
 	
