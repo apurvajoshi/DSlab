@@ -24,7 +24,7 @@ public class MulticastManager {
 		
 		timer = new Timer();
 		//this.timer.schedule(new UpdateAck(), 5*1000, 5*1000);
-		this.timer.scheduleAtFixedRate( new UpdateAck(), 2*1000,5*1000);
+		this.timer.scheduleAtFixedRate( new UpdateAck(), 0,5*1000);
 	}
 	
 	public void runTimer() {

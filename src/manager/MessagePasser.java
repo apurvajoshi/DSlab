@@ -10,8 +10,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-
 import model.Node;
 import model.Rule;
 import model.TimeStampedMessage;
@@ -19,6 +17,7 @@ import model.TimeStampedMessage;
 import org.yaml.snakeyaml.Yaml;
 
 import workers.ListenerThread;
+import workers.MulticastMsgProcessThread;
 import workers.SenderThread;
 
 import clock.ClockService;
@@ -42,7 +41,8 @@ public class MessagePasser {
   private HashMap<Rule, Integer> rcvNthCount;
   private ArrayList<TimeStampedMessage> sendQueue;
   private ArrayList<TimeStampedMessage> rcvQueue;
-  public List<TimeStampedMessage> threadRcvQueue;
+  private List<TimeStampedMessage> applicationQueue;
+  private List<TimeStampedMessage> threadRcvQueue;
   private File configFile;  
   
   
@@ -57,6 +57,7 @@ public class MessagePasser {
 	  sendQueue = new ArrayList<TimeStampedMessage>();
 	  rcvQueue = new ArrayList<TimeStampedMessage>();
 	  threadRcvQueue = Collections.synchronizedList(new ArrayList<TimeStampedMessage>());
+	  applicationQueue = Collections.synchronizedList(new ArrayList<TimeStampedMessage>());
   }
   
  public static MessagePasser getInstance() {
@@ -90,8 +91,10 @@ public class MessagePasser {
 	  try
 	  {
 		  Thread t = new ListenerThread(node.getPort(), this.threadRcvQueue);
-
 		  t.start();
+		  
+		  Thread msgProcessThread = new MulticastMsgProcessThread(this.threadRcvQueue, this.applicationQueue);
+		  msgProcessThread.start();
 	  } 
 	  catch(IOException e)
 	  {
@@ -376,13 +379,13 @@ public class MessagePasser {
 	  {
 		  /* Wait if the thread receiver queue is empty */
 		  //System.out.println("Waiting start...");
-		  while(this.threadRcvQueue.isEmpty())
+		  while(this.applicationQueue.isEmpty())
 		  {
 		  }  
 		  
-		  while(!this.threadRcvQueue.isEmpty())
+		  while(!this.applicationQueue.isEmpty())
 		  {
-			  TimeStampedMessage m = this.threadRcvQueue.remove(0);
+			  TimeStampedMessage m = this.applicationQueue.remove(0);
 			  
 			  int rule = this.checkMessageAgainstRules(m, receiveRules, rcvNthCount);
 			  if(rule != -1)
@@ -411,7 +414,7 @@ public class MessagePasser {
 					  System.out.println("Delaying message with id " + m.getId());
 					  
 					  /* Delayed message is obtained in order */
-					  while(this.threadRcvQueue.isEmpty())
+					  while(this.applicationQueue.isEmpty())
 					  {
 					  }
 		    	  }
