@@ -176,8 +176,7 @@ public class MulticastMsgProcessThread extends Thread {
 							.println("Drop message because I was the sender of the message");
 				} else {
 					if (inorder(entry.getValue().getMessage())) {
-						System.out
-								.println("Message inorder - so move it to rcvQueue");
+						System.out.println("Message inorder - so move it to rcvQueue");
 
 						TimeStampedMessage m = holdQueue.remove(entry.getKey())
 								.getMessage();
