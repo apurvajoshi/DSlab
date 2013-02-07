@@ -108,15 +108,11 @@ public class MulticastMsgProcessThread extends Thread {
 				// Receiving ACK for a message I sent
 				System.out.println("Print holdQueue = " + holdQueue.toString());
 
-				if (holdQueue
-						.containsKey(msg.getTimeStamp().getCount().toString())) {
+				if (holdQueue.containsKey(msg.getTimeStamp().getCount().toString())) {
 					// New ACK but in hold queue
-					System.out
-							.println("New ACK in hold queue for my own message, so update ACK ");
-					holdQueue.get(msg.getTimeStamp().getCount().toString())
-							.setAck(msg.getSrc());
-					if (holdQueue.get(msg.getTimeStamp().getCount().toString())
-							.ifAllAckReceived()) {
+					System.out.println("New ACK in hold queue for my own message, so update ACK ");
+					holdQueue.get(msg.getTimeStamp().getCount().toString()).setAck(msg.getSrc());
+					if (holdQueue.get(msg.getTimeStamp().getCount().toString()).ifAllAckReceived()) {
 						while (sendToApplicationQueue() == 1)
 							;
 					}
