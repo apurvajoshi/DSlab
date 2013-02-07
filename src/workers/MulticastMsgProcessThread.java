@@ -177,7 +177,8 @@ public class MulticastMsgProcessThread extends Thread {
 				} else {
 					if (inorder(entry.getValue().getMessage())) {
 						System.out
-								.println("Message inorder - so move it to rcvQueue");
+								.println("Message inorder - so move it to rcvQueue " + 
+										entry.getValue().getMessage().getTimeStamp().getCount());
 
 						TimeStampedMessage m = holdQueue.remove(entry.getKey())
 								.getMessage();
@@ -201,17 +202,19 @@ public class MulticastMsgProcessThread extends Thread {
 				.getInstance().findNodeByName(m.getSrc()));
 
 		if (mesgTS.getCount().get(mesgIdx) != (localTS.getCount().get(mesgIdx) + 1)) {
+			System.out.println("Message out of order");
 			return false;
 		}
 
 		for (int i = 0; i < mesgTS.getCount().size(); i++) {
 			if (i != mesgIdx) {
 				if (mesgTS.getCount().get(i) > localTS.getCount().get(i)) {
+					System.out.println("Message out of order");
 					return false;
 				}
 			}
 		}
-
+		System.out.println("Message in order");
 		return true;
 	}
 
