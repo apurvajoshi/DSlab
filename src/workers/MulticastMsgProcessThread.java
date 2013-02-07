@@ -11,14 +11,12 @@ import model.TimeStampedMessage;
 public class MulticastMsgProcessThread extends Thread {
 
 	private ConcurrentHashMap<String, MulticastManager> holdQueue;
-	private List<TimeStampedMessage> applicationQueue;
 	private List<TimeStampedMessage> threadRcvQueue;
 
 
-	public MulticastMsgProcessThread(List<TimeStampedMessage> threadRcvQueue, List<TimeStampedMessage> applicationQueue) throws IOException {
+	public MulticastMsgProcessThread(List<TimeStampedMessage> threadRcvQueue) throws IOException {
 		holdQueue = new ConcurrentHashMap<String, MulticastManager>();
 		this.threadRcvQueue = threadRcvQueue;
-		this.applicationQueue = applicationQueue;
 	}
 
 	public void run() {
@@ -81,7 +79,7 @@ public class MulticastMsgProcessThread extends Thread {
 					sendMulticastAck(msg);
 					if (holdQueue.get(msg.getTimeStamp().getCount().toString())
 							.ifAllAckReceived()) {
-						while (sendToApplicationQueue() == 1)
+						while (sendToApplication() == 1)
 							;
 					}
 
@@ -114,7 +112,7 @@ public class MulticastMsgProcessThread extends Thread {
 					System.out.println("New ACK in hold queue for my own message, so update ACK ");
 					holdQueue.get(msg.getTimeStamp().getCount().toString()).setAck(msg.getSrc());
 					if (holdQueue.get(msg.getTimeStamp().getCount().toString()).ifAllAckReceived()) {
-						while (sendToApplicationQueue() == 1)
+						while (sendToApplication() == 1)
 							;
 					}
 
@@ -133,7 +131,7 @@ public class MulticastMsgProcessThread extends Thread {
 							.setAck(msg.getSrc());
 					if (holdQueue.get(msg.getTimeStamp().getCount().toString())
 							.ifAllAckReceived()) {
-						while (sendToApplicationQueue() == 1);
+						while (sendToApplication() == 1);
 					}
 
 				} else {
@@ -147,7 +145,7 @@ public class MulticastMsgProcessThread extends Thread {
 					sendMulticastAck((TimeStampedMessage) msg.getData());
 					if (holdQueue.get(msg.getTimeStamp().getCount().toString())
 							.ifAllAckReceived()) {
-						while (sendToApplicationQueue() == 1);
+						while (sendToApplication() == 1);
 					}
 				}
 			}
@@ -165,7 +163,7 @@ public class MulticastMsgProcessThread extends Thread {
 		}
 	}
 
-	private int sendToApplicationQueue() {
+	private int sendToApplication() {
 		//System.out.println("sendToApplicationQueue");
 
 		for (Entry<String, MulticastManager> entry : holdQueue.entrySet()) {
@@ -179,11 +177,11 @@ public class MulticastMsgProcessThread extends Thread {
 				} else {
 					if (inorder(entry.getValue().getMessage())) {
 						System.out
-								.println("Message inorder - so move it to threadRcvQueue");
+								.println("Message inorder - so move it to rcvQueue");
 
 						TimeStampedMessage m = holdQueue.remove(entry.getKey())
 								.getMessage();
-						this.applicationQueue.add(m);
+						MessagePasser.getInstance().addToRcvQueue(m);
 						return 1;
 					}
 
