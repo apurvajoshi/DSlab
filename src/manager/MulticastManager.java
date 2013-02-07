@@ -1,19 +1,23 @@
 package manager;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
 import model.Node;
 import model.TimeStampedMessage;
 
 public class MulticastManager {
 	private TimeStampedMessage message;
 	private Timer timer;
-	private ConcurrentHashMap<Node, Integer> ack;	
+	private Map<Node, Integer> ack;	
 	
 	public MulticastManager(TimeStampedMessage message) {
 		this.message = message;
-		this.ack = new ConcurrentHashMap<Node, Integer>();
+		this.ack = Collections.synchronizedMap(new HashMap<Node, Integer>());
+
+		//this.ack = new ConcurrentHashMap<Node, Integer>();
 		for(int i = 0 ; i < MessagePasser.getInstance().nodes.size(); i++)
 		{
 			ack.put(MessagePasser.getInstance().nodes.get(i), 0);
@@ -23,8 +27,8 @@ public class MulticastManager {
 		setAck(MessagePasser.localName);
 		
 		timer = new Timer();
-		//this.timer.schedule(new UpdateAck(), 5*1000, 5*1000);
-		this.timer.scheduleAtFixedRate( new UpdateAck(), 0,10*1000);
+
+		this.timer.scheduleAtFixedRate( new UpdateAck(), 2*1000,5*1000);
 	}
 	
 	public void runTimer() {
