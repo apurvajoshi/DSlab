@@ -77,6 +77,11 @@ public class ReceiverThread implements Runnable{
     				System.out.println("New Message received = " + msg.getTimeStamp().getCount().toString());
             		this.holdQueue.put(msg.getTimeStamp().getCount().toString(), new MulticastManager(msg));	
     				sendMulticastAck(msg);
+    				if (holdQueue.get(msg.getTimeStamp().getCount().toString()).ifAllAckReceived())
+    				{
+    					while(addThreadRcvQueue() == 1);
+    				}
+    	
     			}        		
         	}
         	else if ((msgOrder == 1) || (msgOrder == 0) || (msg.getKind().equals("replay"))) {

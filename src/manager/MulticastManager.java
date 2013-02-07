@@ -47,21 +47,15 @@ public class MulticastManager {
 	}
 	
 	public boolean ifAllAckReceived() {
-		int cancelTimer = 1;
-		allAckReceived = false;
 		for (Entry<Node, Integer> entry : ack.entrySet()) {
             System.out.println("Key = " + entry.getKey().getName() + ", Value = " + entry.getValue());
             if (entry.getValue().intValue() == 0)
             {
-            	cancelTimer = 0;
-            	 //TimeStampedMessage msg = new TimeStampedMessage(MessagePasser.localName, entry.getKey().getName(), "replay", message, message.getTimeStamp());
-            	 //MessagePasser.getInstance().send(msg);
+            	return false;
             }
         }
-		if(cancelTimer == 1) {
-        	allAckReceived = true;
-        }
-		return allAckReceived;
+		return true;
+		//return allAckReceived;
 
 	}
 	
