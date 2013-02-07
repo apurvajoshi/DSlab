@@ -1,10 +1,6 @@
 import java.io.FileNotFoundException;
 import java.util.Scanner;
-
 import clock.TimeStamp;
-
-import com.sun.jmx.snmp.Timestamp;
-
 import manager.MessagePasser;
 import model.TimeStampedMessage;
 

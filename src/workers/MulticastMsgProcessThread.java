@@ -38,6 +38,7 @@ public class MulticastMsgProcessThread extends Thread {
 		int msgOrder = msg.getTimeStamp().compare(
 				MessagePasser.getInstance().clockService.getTimestamp());
 
+		//change
 		//System.out.println("msg order = " + msgOrder);
 
 		if (!msg.getKind().equals("ack")) {
