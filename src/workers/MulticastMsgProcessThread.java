@@ -45,7 +45,7 @@ public class MulticastMsgProcessThread extends Thread {
 		if (!msg.getKind().equals("ack")) {
 			System.out.println("Not an ack");
 			if (msg.getSrc().equals(MessagePasser.localName)) {
-				if (!this.holdQueue.contains(msg.getTimeStamp().getCount()
+				if (!this.holdQueue.containsKey(msg.getTimeStamp().getCount()
 						.toString())) {
 					this.holdQueue.put(
 							msg.getTimeStamp().getCount().toString(),
@@ -56,7 +56,7 @@ public class MulticastMsgProcessThread extends Thread {
 					System.out.println("Print holdQueue = "
 							+ holdQueue.toString() + "holdQueue size = "
 							+ holdQueue.size());
-
+					
 				}
 				return;
 			}
@@ -109,7 +109,7 @@ public class MulticastMsgProcessThread extends Thread {
 				System.out.println("Print holdQueue = " + holdQueue.toString());
 
 				if (holdQueue
-						.contains(msg.getTimeStamp().getCount().toString())) {
+						.containsKey(msg.getTimeStamp().getCount().toString())) {
 					// New ACK but in hold queue
 					System.out
 							.println("New ACK in hold queue for my own message, so update ACK ");
@@ -129,7 +129,7 @@ public class MulticastMsgProcessThread extends Thread {
 				}
 			} else {
 				if (holdQueue
-						.contains(msg.getTimeStamp().getCount().toString())) {
+						.containsKey(msg.getTimeStamp().getCount().toString())) {
 					// New ACK but in hold queue
 					System.out.println("New ACK in hold queue, so update ACK ");
 					holdQueue.get(msg.getTimeStamp().getCount().toString())
