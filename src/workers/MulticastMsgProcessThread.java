@@ -71,8 +71,8 @@ public class MulticastMsgProcessThread extends Thread {
 					sendMulticastAck(msg);
 				} else {
 					// else new message , add to hold queue
-					System.out.println("New Message received = "
-							+ msg.getTimeStamp().getCount().toString() + "Curr TS - " + MessagePasser.getInstance().clockService.getTimestamp().getCount());
+					System.out.println("New Message received = " + msg.getSrc() + " to " + msg.getDest()
+							+ msg.getTimeStamp().getCount().toString() + "|| Curr TS - " + MessagePasser.getInstance().clockService.getTimestamp().getCount());
 					this.holdQueue.put(
 							msg.getTimeStamp().getCount().toString(),
 							new MulticastManager(msg));
@@ -170,10 +170,11 @@ public class MulticastMsgProcessThread extends Thread {
 			if (entry.getValue().ifAllAckReceived()) {
 				System.out.println("All acks received");
 				if (entry.getValue().getMessage().getSrc()
-						.equals(MessagePasser.localName)) {
-					holdQueue.remove(entry.getKey());
+						.equals(MessagePasser.localName)) {					
 					System.out
-							.println("Drop message because I was the sender of the message");
+							.println("Drop message because I" + entry.getValue().getMessage().getSrc() + 
+									" was the sender of the message");
+					holdQueue.remove(entry.getKey());
 				} else {
 					if (inorder(entry.getValue().getMessage())) {
 
@@ -203,14 +204,16 @@ public class MulticastMsgProcessThread extends Thread {
 				.getInstance().findNodeByName(m.getSrc()));
 
 		if (mesgTS.getCount().get(mesgIdx) != (localTS.getCount().get(mesgIdx) + 1)) {
-			System.out.println("Message out of order");
+			System.out.println("1 Message out of order " + mesgTS.getCount().get(mesgIdx) + " " +
+					localTS.getCount().get(mesgIdx));
 			return false;
 		}
 
 		for (int i = 0; i < mesgTS.getCount().size(); i++) {
 			if (i != mesgIdx) {
 				if (mesgTS.getCount().get(i) > localTS.getCount().get(i)) {
-					System.out.println("Message out of order");
+					System.out.println("2 Message out of order " + mesgTS.getCount().get(i)
+							+ " " + localTS.getCount().get(i));
 					return false;
 				}
 			}

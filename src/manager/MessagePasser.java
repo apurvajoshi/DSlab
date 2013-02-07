@@ -367,6 +367,8 @@ public class MessagePasser {
   /* Does rule processing + resync's the timestamp */
   public void addToRcvQueue(TimeStampedMessage m)
   {
+	  System.out.println("addToRcvQueue");
+	  
 	  int rule = this.checkMessageAgainstRules(m, receiveRules, rcvNthCount);
 	  if(rule != -1)
 	  {
@@ -375,7 +377,7 @@ public class MessagePasser {
     	  if(receiveRules.get(rule).getAction().equals("drop"))
     	  { 
     		  /* Just ignore */
-			  System.out.println("Droping message with id " + m.getId());
+			  System.out.println("Dropping message with id " + m.getId());
 
     	  }
     	  else if(receiveRules.get(rule).getAction().equals("duplicate"))
@@ -384,7 +386,7 @@ public class MessagePasser {
     		  TimeStampedMessage msg = (TimeStampedMessage) m.clone();
     		  this.rcvQueue.add(m);
     		  this.rcvQueue.add(msg);
-    		  clockService.resyncTimeStamp(this.rcvQueue.get(0).getTimeStamp());
+    		  clockService.resyncTimeStamp(m.getTimeStamp());
 			  System.out.println("Duplicating message with id " + m.getId());
 
     	  }
@@ -392,7 +394,8 @@ public class MessagePasser {
     	  {
     		  /* Add it to queue */
     		  this.rcvQueue.add(m);
-    		  clockService.resyncTimeStamp(this.rcvQueue.get(0).getTimeStamp());
+    		  System.out.println("Syncing TS Cur " + MessagePasser.getInstance().clockService.getTimestamp().getCount() + " new " + this.rcvQueue.get(0).getTimeStamp());
+    		  clockService.resyncTimeStamp(m.getTimeStamp());
 			  System.out.println("Delaying message with id " + m.getId());
 			  
 			  /* Delayed message is obtained in order */
@@ -403,9 +406,9 @@ public class MessagePasser {
 	  }
 	  else
 	  {
-    	  //System.out.println("No Match exists");
+    	  System.out.println("No Receive Rule Match exists");
     	  this.rcvQueue.add(m);
-		  clockService.resyncTimeStamp(this.rcvQueue.get(0).getTimeStamp());
+		  clockService.resyncTimeStamp(m.getTimeStamp());
 
 	  }
   }
