@@ -372,6 +372,25 @@ public class MessagePasser {
   public void addToProcessQueue(TimeStampedMessage m)
   {
 	  System.out.println("addToProcessQueue");
+	
+	  /* Reread the configuration file if the modification time has been changed*/	  
+	  File f = configFile;	  
+	  
+      if(this.modificationTime != f.lastModified())
+      {
+    	  System.out.println("File has been modified");
+
+    	  /* Reread the file */
+    	  try {
+			this.readRules();
+    	  } catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+    	  }
+    	  
+    	  /* Reset the Nth and EveryNth Counters if the file has been changed */
+
+      }
 	  
 	  int rule = this.checkMessageAgainstRules(m, receiveRules, rcvNthCount);
 	  if(rule != -1)
