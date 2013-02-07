@@ -73,7 +73,7 @@ public class MulticastMsgProcessThread extends Thread {
 				} else {
 					// else new message , add to hold queue
 					System.out.println("New Message received = "
-							+ msg.getTimeStamp().getCount().toString());
+							+ msg.getTimeStamp().getCount().toString() + "Curr TS - " + MessagePasser.getInstance().clockService.getTimestamp().getCount());
 					this.holdQueue.put(
 							msg.getTimeStamp().getCount().toString(),
 							new MulticastManager(msg));
