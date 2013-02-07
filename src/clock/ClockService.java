@@ -11,13 +11,13 @@ public abstract class ClockService {
 		return "This is the class named: \""+ this.getClass().getSimpleName()+"\"";
 	}
 	
-	public TimeStamp getTimestamp() {
+	public synchronized TimeStamp getTimestamp() {
 		return timestamp;
 	}
 	
 	public abstract void setTimestamp();
 	
-	public void increment(int index) {
+	public synchronized void increment(int index) {
 		int count = this.timestamp.getCount().get(index);
 		count++;
 		//System.out.println("Count  = " + count);
