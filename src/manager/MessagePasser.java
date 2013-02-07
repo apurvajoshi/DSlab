@@ -40,7 +40,7 @@ public class MessagePasser {
   private HashMap<Rule, Integer> sendNthCount;
   private HashMap<Rule, Integer> rcvNthCount;
   private ArrayList<TimeStampedMessage> sendQueue;
-  private ArrayList<TimeStampedMessage> rcvQueue;
+  private List<TimeStampedMessage> rcvQueue;
   private List<TimeStampedMessage> threadRcvQueue;
   private File configFile;  
   
@@ -54,7 +54,7 @@ public class MessagePasser {
 	  sendNthCount = new HashMap<Rule, Integer>();
 	  rcvNthCount = new HashMap<Rule, Integer>();
 	  sendQueue = new ArrayList<TimeStampedMessage>();
-	  rcvQueue = new ArrayList<TimeStampedMessage>();
+	  rcvQueue = Collections.synchronizedList(new ArrayList<TimeStampedMessage>());
 	  threadRcvQueue = Collections.synchronizedList(new ArrayList<TimeStampedMessage>());
   }
   
