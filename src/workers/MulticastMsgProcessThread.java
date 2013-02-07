@@ -36,14 +36,14 @@ public class MulticastMsgProcessThread extends Thread {
 	}
 
 	public void ProcessMulticastMessage(TimeStampedMessage msg) {
-		System.out.println("ProcessMulticastMessage");
+		//System.out.println("ProcessMulticastMessage");
 		int msgOrder = msg.getTimeStamp().compare(
 				MessagePasser.getInstance().clockService.getTimestamp());
 
-		System.out.println("msg order = " + msgOrder);
+		//System.out.println("msg order = " + msgOrder);
 
 		if (!msg.getKind().equals("ack")) {
-			System.out.println("Not an ack");
+			//System.out.println("Not an ack");
 			if (msg.getSrc().equals(MessagePasser.localName)) {
 				if (!this.holdQueue.containsKey(msg.getTimeStamp().getCount()
 						.toString())) {
@@ -53,10 +53,11 @@ public class MulticastMsgProcessThread extends Thread {
 					System.out
 							.println("Added to hold queue - received from  myself. KEY TS "
 									+ msg.getTimeStamp().getCount().toString());
+					/*
 					System.out.println("Print holdQueue = "
 							+ holdQueue.toString() + "holdQueue size = "
 							+ holdQueue.size());
-					
+					*/
 				}
 				return;
 			}
@@ -96,7 +97,7 @@ public class MulticastMsgProcessThread extends Thread {
 			}
 		} else {
 
-			System.out.println("An ack");
+			//System.out.println("An ack");
 			// Ack
 			// If Ack is < Current Timestamp or if I am the source, drop it.
 			if ((msgOrder == 1)
@@ -106,7 +107,7 @@ public class MulticastMsgProcessThread extends Thread {
 				return;
 			} else if (msgOrder == 0) {
 				// Receiving ACK for a message I sent
-				System.out.println("Print holdQueue = " + holdQueue.toString());
+				//System.out.println("Print holdQueue = " + holdQueue.toString());
 
 				if (holdQueue.containsKey(msg.getTimeStamp().getCount().toString())) {
 					// New ACK but in hold queue
@@ -165,7 +166,7 @@ public class MulticastMsgProcessThread extends Thread {
 	}
 
 	private int sendToApplicationQueue() {
-		System.out.println("sendToApplicationQueue");
+		//System.out.println("sendToApplicationQueue");
 
 		for (Entry<String, MulticastManager> entry : holdQueue.entrySet()) {
 			if (entry.getValue().ifAllAckReceived()) {

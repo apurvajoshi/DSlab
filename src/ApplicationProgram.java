@@ -32,13 +32,14 @@ public class ApplicationProgram {
         	while(true) {
             	m.LogMessage = false;
             	
-            	System.out.println("\nAction? 1. Send 2. Receive 3. Send + Log 4. Receive + Log 5. Dummy");
+            	System.out.println("\nAction? 1. Send 2. Receive");
                 input = inputReader.nextInt();
                 inputReader.nextLine(); //New line
                 
                 switch(input) {
                 	case 3: m.LogMessage = true;
-        	        case 1: System.out.println("Destination? ");    	        		
+        	        case 1: /*
+        	        		System.out.println("Destination? ");    	        		
         	        		String dest = inputReader.nextLine();
         	        		if (dest == args[1]) {
         	        			System.out.println("Destination can't be same as source \n");
@@ -47,7 +48,8 @@ public class ApplicationProgram {
         	        		if (m.findNodeByName(dest) == null) {
         	        			System.out.println("Invalid Destination process. Check configuration file.\n");
         	        			break;
-        	        		}
+        	        		} 
+        	        		*/
         	
         	        		System.out.println("Kind? ");
         	        		String kind = inputReader.nextLine();
@@ -61,7 +63,7 @@ public class ApplicationProgram {
         	        			m.getClockService().increment(0);
         	        		else
         	        			m.getClockService().increment(MessagePasser.getInstance().nodes.indexOf(m.findNodeByName(args[1])));
-        	        		TimeStampedMessage msg = new TimeStampedMessage(args[1], dest, kind, data, m.getClockService().getTimestamp());
+        	        		TimeStampedMessage msg = new TimeStampedMessage(args[1], args[1], kind, data, m.getClockService().getTimestamp());
         	        		m.sendMulticastMessage(msg);
         	        		break;
         	        
