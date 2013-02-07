@@ -59,9 +59,10 @@ public class ReceiverThread implements Runnable{
 		if (!msg.getKind().equals("ack")) {
 			System.out.println("Not an ack");
 			if (msg.getSrc().equals(MessagePasser.localName)) {
-	    		if(!this.holdQueue.contains(msg.getTimeStamp().getCount().toString()))
+	    		if(!this.holdQueue.contains(msg.getTimeStamp().getCount().toString())) {
 	    			this.holdQueue.put(msg.getTimeStamp().getCount().toString(), new MulticastManager(msg));
-	    			System.out.println("Added to hold queue - received from  myself ");
+	    			System.out.println("Added to hold queue - received from  myself. KEY TS " + msg.getTimeStamp().getCount().toString());	    			
+	    		}	    			
 	    		return;
 	    	}
 			
@@ -94,11 +95,29 @@ public class ReceiverThread implements Runnable{
     		
     		System.out.println("An ack");
     		//Ack
-    		// If Ack is <= Current Timestamp or if I am the source, drop it.
-    		if (((msgOrder == 0) || (msgOrder == 1)) || (msg.getSrc().equals(MessagePasser.localName))) {
+    		// If Ack is < Current Timestamp or if I am the source, drop it.
+    		if ((msgOrder == 1) || (msg.getSrc().equals(MessagePasser.localName))) {
     			//drop message
     			System.out.println("Drop ACK - old / equal or mine");
     			return; 
+    		}
+    		else if (msgOrder == 0) { 
+    			//Receiving ACK for a message I sent
+    			if (holdQueue.contains(msg.getTimeStamp().getCount().toString())) {
+    				// New ACK but in hold queue
+    				System.out.println("New ACK in hold queue for my own message, so update ACK ");
+    				holdQueue.get(msg.getTimeStamp().getCount().toString()).setAck(msg.getSrc());
+    				if (holdQueue.get(msg.getTimeStamp().getCount().toString()).ifAllAckReceived())
+    				{
+    					while(addThreadRcvQueue() == 1);
+    				}
+    					
+    			}
+    			else {
+    				//Old ACK
+    				System.out.println("Old ACK, dropping it. TS " + msg.getTimeStamp().getCount().toString());
+    				return;
+    			}
     		}
     		else {
     			if (holdQueue.contains(msg.getTimeStamp().getCount().toString())) {
@@ -137,6 +156,8 @@ public class ReceiverThread implements Runnable{
     }
     
     public int addThreadRcvQueue() {
+    	System.out.println("addThreadRcvQueue");
+    	
     	for (Entry<String, MulticastManager> entry : holdQueue.entrySet()) {
     		if (entry.getValue().ifAllAckReceived()) {
     			System.out.println("All acks received");

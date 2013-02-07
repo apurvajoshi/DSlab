@@ -55,12 +55,13 @@ public class ApplicationProgram {
     	        		String data = inputReader.nextLine();
     	        		
     	        		//Message msg = new Message(args[1], dest, kind, data);
+    	        		
     	        		if(m.getClockService().getClass().getSimpleName().equals("LogicalClock"))
     	        			m.getClockService().increment(0);
     	        		else
     	        			m.getClockService().increment(MessagePasser.getInstance().nodes.indexOf(m.findNodeByName(args[1])));
     	        		TimeStampedMessage msg = new TimeStampedMessage(args[1], dest, kind, data, m.getClockService().getTimestamp());
-    	        		m.send(msg);
+    	        		m.sendMulticastMessage(msg);
     	        		break;
     	        
     	        case 4: m.LogMessage = true;

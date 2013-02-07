@@ -225,7 +225,7 @@ public class MessagePasser {
   
   public void sendMulticastMessage(Object data)
   {
-	  this.getClockService().increment(MessagePasser.getInstance().nodes.indexOf(this.findNodeByName(localName)));
+	  //this.getClockService().increment(MessagePasser.getInstance().nodes.indexOf(this.findNodeByName(localName)));
 	  for(int i = 0; i < nodes.size(); i++)
 	  {
   		TimeStampedMessage msg = new TimeStampedMessage(localName, nodes.get(i).getName(), "multicast", data, this.getClockService().getTimestamp());
