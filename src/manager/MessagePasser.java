@@ -460,6 +460,9 @@ public class MessagePasser {
 	  Yaml yaml = new Yaml();
 	  Map map = (Map) yaml.load(input);
 	  
+	  this.sendRules.clear();
+	  this.receiveRules.clear();
+	  
 	  //System.out.println(map.get("SendRules"));
 	  ArrayList<HashMap> rules = (ArrayList<HashMap>) map.get("SendRules");
 	  if(rules != null)
