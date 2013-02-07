@@ -229,7 +229,7 @@ public class MessagePasser {
 	  //this.getClockService().increment(MessagePasser.getInstance().nodes.indexOf(this.findNodeByName(localName)));
 	  for(int i = 0; i < nodes.size(); i++)
 	  {
-  		TimeStampedMessage msg = new TimeStampedMessage(localName, nodes.get(i).getName(), m.getKind(), m.getData(), this.getClockService().getTimestamp());
+  		TimeStampedMessage msg = new TimeStampedMessage(localName, nodes.get(i).getName(), m.getKind(), m.getData(), m.getTimeStamp());
   		send(msg);
 	  }
   }
@@ -297,7 +297,7 @@ public class MessagePasser {
     	  {
     		  /* Add it to queue */
     		  sendQueue.add(message);
-			  System.out.println("Delaying message with id " + message.getId());
+			  System.out.println("Delaying message with id " + message.getId() + message.getTimeStamp().getCount());
 
     		  
     	  }

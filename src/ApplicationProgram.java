@@ -1,6 +1,10 @@
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+import clock.TimeStamp;
+
+import com.sun.jmx.snmp.Timestamp;
+
 import manager.MessagePasser;
 import model.TimeStampedMessage;
 
@@ -63,7 +67,8 @@ public class ApplicationProgram {
         	        			m.getClockService().increment(0);
         	        		else
         	        			m.getClockService().increment(MessagePasser.getInstance().nodes.indexOf(m.findNodeByName(args[1])));
-        	        		TimeStampedMessage msg = new TimeStampedMessage(args[1], args[1], kind, data, m.getClockService().getTimestamp());
+        	        		TimeStamp t = new TimeStamp(m.getClockService().getTimestamp());
+        	        		TimeStampedMessage msg = new TimeStampedMessage(args[1], args[1], kind, data, t);
         	        		m.sendMulticastMessage(msg);
         	        		break;
         	        
