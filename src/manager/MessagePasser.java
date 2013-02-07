@@ -362,7 +362,7 @@ public class MessagePasser {
 	  
 	  if(!this.rcvQueue.isEmpty())
 	  {
-		  clockService.resyncTimeStamp(this.rcvQueue.get(0).getTimeStamp());
+		  //clockService.resyncTimeStamp(this.rcvQueue.get(0).getTimeStamp());
 		  
 		  /*if(clockService.getClass().getSimpleName().equals("LogicalClock"))
 			  clockService.increment(0);
@@ -371,7 +371,7 @@ public class MessagePasser {
 		  
 		  System.out.println("The message is from " + this.rcvQueue.get(0).getSrc() + " to " +
 	  this.rcvQueue.get(0).getDest() + " with ID " + this.rcvQueue.get(0).getId() + 
-	  " TIMESTAMP " + clockService.getTimestamp().getCount());
+	  " TIMESTAMP " + this.rcvQueue.get(0).getTimeStamp().getCount());
 		  
 		  return this.rcvQueue.remove(0);
 	  }
@@ -386,49 +386,56 @@ public class MessagePasser {
 		  while(!this.applicationQueue.isEmpty())
 		  {
 			  TimeStampedMessage m = this.applicationQueue.remove(0);
-			  
-			  int rule = this.checkMessageAgainstRules(m, receiveRules, rcvNthCount);
-			  if(rule != -1)
+			  int order =  m.getTimeStamp().compare(this.clockService.getTimestamp());
+			  if(order == 2 || order == 3)
 			  {
-		    	  System.out.println("Receive rule matched!");
-		    	  /* Perform the action related to the matched rule */
-		    	  if(receiveRules.get(rule).getAction().equals("drop"))
-		    	  { 
-		    		  /* Just ignore */
-					  System.out.println("Droping message with id " + m.getId());
+				  int rule = this.checkMessageAgainstRules(m, receiveRules, rcvNthCount);
+				  if(rule != -1)
+				  {
+			    	  System.out.println("Receive rule matched!");
+			    	  /* Perform the action related to the matched rule */
+			    	  if(receiveRules.get(rule).getAction().equals("drop"))
+			    	  { 
+			    		  /* Just ignore */
+						  System.out.println("Droping message with id " + m.getId());
 
-		    	  }
-		    	  else if(receiveRules.get(rule).getAction().equals("duplicate"))
-		    	  {
-		    		  /* Add two identical copies to the queue */
-		    		  TimeStampedMessage msg = (TimeStampedMessage) m.clone();
-		    		  this.rcvQueue.add(m);
-		    		  this.rcvQueue.add(msg);
-					  System.out.println("Duplicating message with id " + m.getId());
+			    	  }
+			    	  else if(receiveRules.get(rule).getAction().equals("duplicate"))
+			    	  {
+			    		  /* Add two identical copies to the queue */
+			    		  TimeStampedMessage msg = (TimeStampedMessage) m.clone();
+			    		  this.rcvQueue.add(m);
+			    		  this.rcvQueue.add(msg);
+			    		  clockService.resyncTimeStamp(this.rcvQueue.get(0).getTimeStamp());
+						  System.out.println("Duplicating message with id " + m.getId());
 
-		    	  }
-		    	  else if(receiveRules.get(rule).getAction().equals("delay"))
-		    	  {
-		    		  /* Add it to queue */
-		    		  this.rcvQueue.add(m);  
-					  System.out.println("Delaying message with id " + m.getId());
-					  
-					  /* Delayed message is obtained in order */
-					  while(this.applicationQueue.isEmpty())
-					  {
-					  }
-		    	  }
-			  }
-			  else
-			  {
-		    	  //System.out.println("No Match exists");
-		    	  this.rcvQueue.add(m);
+			    	  }
+			    	  else if(receiveRules.get(rule).getAction().equals("delay"))
+			    	  {
+			    		  /* Add it to queue */
+			    		  this.rcvQueue.add(m);
+			    		  clockService.resyncTimeStamp(this.rcvQueue.get(0).getTimeStamp());
+						  System.out.println("Delaying message with id " + m.getId());
+						  
+						  /* Delayed message is obtained in order */
+						  while(this.applicationQueue.isEmpty())
+						  {
+						  }
+			    	  }
+				  }
+				  else
+				  {
+			    	  //System.out.println("No Match exists");
+			    	  this.rcvQueue.add(m);
+					  clockService.resyncTimeStamp(this.rcvQueue.get(0).getTimeStamp());
+
+				  }
 			  }
 		  }
 		  
 		  if(!this.rcvQueue.isEmpty())
 		  {
-			  clockService.resyncTimeStamp(this.rcvQueue.get(0).getTimeStamp());
+			  //clockService.resyncTimeStamp(this.rcvQueue.get(0).getTimeStamp());
 			  
 			  /*if(clockService.getClass().getSimpleName().equals("LogicalClock"))
 				  clockService.increment(0);
@@ -437,7 +444,7 @@ public class MessagePasser {
 			  
 			  System.out.println("The message is from " + this.rcvQueue.get(0).getSrc() + " to " +
 					  this.rcvQueue.get(0).getDest() + " with ID " + this.rcvQueue.get(0).getId() + 
-					  " TIMESTAMP " +  clockService.getTimestamp().getCount());
+					  " TIMESTAMP " + this.rcvQueue.get(0).getTimeStamp().getCount());
 			  return this.rcvQueue.remove(0);
 
 		  }
