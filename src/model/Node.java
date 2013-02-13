@@ -1,17 +1,26 @@
 package model;
+
+import java.util.ArrayList;
+
 public class Node {	
 	private String name;
 	private String ip;
 	private Integer port;
+	private ArrayList<String> processGroup;
 	public Node()
 	{
 		
 	}
-	public Node(String name,String ip, Integer port)
+	public Node(String name,String ip, Integer port, ArrayList<String> pg)
 	{
 		this.name = name;
 		this.ip = ip;
 		this.port = port;
+		this.processGroup = new ArrayList<String>();
+		for(int i = 0; i < pg.size(); i++)
+		{
+			this.processGroup.add(pg.get(i));
+		}
 	}
 	
 	public String getName() {
@@ -31,5 +40,11 @@ public class Node {
 	}
 	public void setPort(Integer port) {
 		this.port = port;
+	}
+	public ArrayList<String> getProcessGroup() {
+		return processGroup;
+	}
+	public void setProcessGroup(ArrayList<String> processGroup) {
+		this.processGroup = processGroup;
 	}	
 }

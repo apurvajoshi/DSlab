@@ -32,13 +32,13 @@ public class ApplicationProgram {
         	while(true) {
             	m.LogMessage = false;
             	
-            	System.out.println("\nAction? 1. Send 2. Receive");
+            	System.out.println("\nAction? 1. Send 2. Receive 3.Dummy event");
                 input = inputReader.nextInt();
                 inputReader.nextLine(); //New line
                 
                 switch(input) {
                 	case 3: m.LogMessage = true;
-        	        case 1: /*
+        	        case 1: 
         	        		System.out.println("Destination? ");    	        		
         	        		String dest = inputReader.nextLine();
         	        		if (dest == args[1]) {
@@ -49,23 +49,21 @@ public class ApplicationProgram {
         	        			System.out.println("Invalid Destination process. Check configuration file.\n");
         	        			break;
         	        		} 
-        	        		*/
-        	
+        	        		
         	        		System.out.println("Kind? ");
         	        		String kind = inputReader.nextLine();
         	        		
         	        		System.out.println("Data? ");
         	        		String data = inputReader.nextLine();
         	        		
-        	        		//Message msg = new Message(args[1], dest, kind, data);
-        	        		
         	        		if(m.getClockService().getClass().getSimpleName().equals("LogicalClock"))
         	        			m.getClockService().increment(0);
         	        		else
         	        			m.getClockService().increment(MessagePasser.getInstance().nodes.indexOf(m.findNodeByName(args[1])));
         	        		TimeStamp t = new TimeStamp(m.getClockService().getTimestamp());
-        	        		TimeStampedMessage msg = new TimeStampedMessage(args[1], args[1], kind, data, t);
-        	        		m.sendMulticastMessage(msg);
+        	        		TimeStampedMessage msg = new TimeStampedMessage(args[1], dest, kind, data, t);
+        	        		m.send(msg);
+        	        		//m.sendMulticastMessage(msg);
         	        		break;
         	        
         	        case 4: m.LogMessage = true;

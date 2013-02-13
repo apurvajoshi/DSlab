@@ -18,6 +18,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import workers.ListenerThread;
 import workers.MulticastMsgProcessThread;
+import workers.MutualExclusionThread;
 import workers.SenderThread;
 
 import clock.ClockService;
@@ -95,7 +96,8 @@ public class MessagePasser {
 		  Thread t = new ListenerThread(node.getPort(), this.threadRcvQueue);
 		  t.start();
 		  
-		  Thread msgProcessThread = new MulticastMsgProcessThread(this.threadRcvQueue);
+		  Thread msgProcessThread = new MutualExclusionThread(threadRcvQueue);
+		  //Thread msgProcessThread = new MulticastMsgProcessThread(this.threadRcvQueue);
 		  msgProcessThread.start();
 	  } 
 	  catch(IOException e)
@@ -238,6 +240,18 @@ public class MessagePasser {
 	  }
   }
   
+  
+  public void sendMReq(TimeStampedMessage m)
+  {
+	  Node localNode = this.findNodeByName(localName);
+	  for(int i = 0; i < localNode.getProcessGroup().size(); i++ )
+	  {
+		  TimeStampedMessage msg = new TimeStampedMessage(localName, localNode.getProcessGroup().get(i),"mreq", m.getData(), m.getTimeStamp());
+		  send(msg);
+
+	  }
+  }
+  
  
   public synchronized void send(TimeStampedMessage message)
   {	  
@@ -302,8 +316,6 @@ public class MessagePasser {
     		  /* Add it to queue */
     		  sendQueue.add(message);
 			  System.out.println("Delaying message with id " + message.getId() + message.getTimeStamp().getCount());
-
-    		  
     	  }
       }
       else
@@ -363,7 +375,7 @@ public class MessagePasser {
 	  
 	  System.out.println("The message is from " + this.rcvQueue.get(0).getSrc() + " to " +
   this.rcvQueue.get(0).getDest() + " with ID " + this.rcvQueue.get(0).getId() + 
-  " TIMESTAMP " + this.rcvQueue.get(0).getTimeStamp().getCount());
+  " TIMESTAMP " + clockService.getTimestamp().getCount());
 	  
 	  return this.rcvQueue.remove(0);
   }
@@ -447,7 +459,9 @@ public class MessagePasser {
 	  ArrayList<HashMap> processes = (ArrayList<HashMap>) map.get("Configuration");
 	  for(int i=0; i < processes.size(); i++)
 	  {
-		  Node n = new Node((String)processes.get(i).get("Name"),(String)processes.get(i).get("IP"), (Integer)processes.get(i).get("Port"));
+		  Node n = new Node((String)processes.get(i).get("Name"),(String)processes.get(i).get("IP"),
+				  (Integer)processes.get(i).get("Port"), (ArrayList<String>)processes.get(i).get("Group"));
+		  System.out.println(" Process Group = " + (ArrayList<String>)processes.get(i).get("Group"));
 		  nodes.add(n);
 	  }
   }
