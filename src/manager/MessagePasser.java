@@ -44,7 +44,7 @@ public class MessagePasser {
   public List<TimeStampedMessage> rcvQueue;
   private List<TimeStampedMessage> threadRcvQueue;
   public List<TimeStampedMessage> processQueue;
-  private List<TimeStampedMessage> meSendQueue; 
+  public List<TimeStampedMessage> meSendQueue; 
   private File configFile;  
   
   
@@ -306,6 +306,7 @@ public class MessagePasser {
     			  /* Remove and call the send function */
     			  System.out.println("Sending message with id " +sendQueue.get(0).getId() + 
     					  " TIMESTAMP " + sendQueue.get(0).getTimeStamp().getCount());
+    			  
     			  this.meSendQueue.add(sendQueue.remove(0));
     			  sendViaSocket(sendQueue.remove(0));
     		  }
