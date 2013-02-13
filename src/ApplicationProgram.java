@@ -32,14 +32,28 @@ public class ApplicationProgram {
         	while(true) {
             	m.LogMessage = false;
             	
-            	System.out.println("\nAction? 1. Send 2. Receive 3.Dummy event");
+            	System.out.println("\nAction? 1. Send mreq 2. Receive 3.Send mrel");
                 input = inputReader.nextInt();
                 inputReader.nextLine(); //New line
                 
                 switch(input) {
-                	case 3: m.LogMessage = true;
+                                	
+                	case 3: //m.LogMessage = true;
+	                		String kind = "mrel";
+	    	        		System.out.println("Data? ");
+	    	        		String data = inputReader.nextLine();
+	    	        		
+	    	        		if(m.getClockService().getClass().getSimpleName().equals("LogicalClock"))
+	    	        			m.getClockService().increment(0);
+	    	        		else
+	    	        			m.getClockService().increment(MessagePasser.getInstance().nodes.indexOf(m.findNodeByName(args[1])));
+	    	        		
+	    	        		TimeStamp t = new TimeStamp(m.getClockService().getTimestamp());
+	    	        		TimeStampedMessage msg = new TimeStampedMessage(args[1], args[1], kind, data, t);
+	    	        		m.send(msg);
+	    	        		break;
         	        case 1: 
-        	        		System.out.println("Destination? ");    	        		
+        	        		/*System.out.println("Destination? ");    	        		
         	        		String dest = inputReader.nextLine();
         	        		if (dest == args[1]) {
         	        			System.out.println("Destination can't be same as source \n");
@@ -48,20 +62,22 @@ public class ApplicationProgram {
         	        		if (m.findNodeByName(dest) == null) {
         	        			System.out.println("Invalid Destination process. Check configuration file.\n");
         	        			break;
-        	        		} 
+        	        		}*/ 
         	        		
-        	        		System.out.println("Kind? ");
-        	        		String kind = inputReader.nextLine();
+        	        		//System.out.println("Kind? ");
+        	        		//String kind = inputReader.nextLine();
+        	        		kind = "mreq";
         	        		
         	        		System.out.println("Data? ");
-        	        		String data = inputReader.nextLine();
+        	        		data = inputReader.nextLine();
         	        		
         	        		if(m.getClockService().getClass().getSimpleName().equals("LogicalClock"))
         	        			m.getClockService().increment(0);
         	        		else
         	        			m.getClockService().increment(MessagePasser.getInstance().nodes.indexOf(m.findNodeByName(args[1])));
-        	        		TimeStamp t = new TimeStamp(m.getClockService().getTimestamp());
-        	        		TimeStampedMessage msg = new TimeStampedMessage(args[1], dest, kind, data, t);
+        	        		
+        	        		t = new TimeStamp(m.getClockService().getTimestamp());
+        	        		msg = new TimeStampedMessage(args[1], args[1], kind, data, t);
         	        		m.send(msg);
         	        		//m.sendMulticastMessage(msg);
         	        		break;

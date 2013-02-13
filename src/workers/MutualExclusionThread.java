@@ -33,15 +33,6 @@ public class MutualExclusionThread extends Thread {
 					
 					
 					MessagePasser.getInstance().clockService.resyncTimeStamp(msg.getTimeStamp());
-					if(MessagePasser.getInstance().clockService.getClass().getSimpleName().equals("LogicalClock"))
-					{
-						MessagePasser.getInstance().clockService.increment(0);
-					}
-					else 
-					{
-						MessagePasser.getInstance();
-						MessagePasser.getInstance().clockService.increment(MessagePasser.getInstance().nodes.indexOf(MessagePasser.getInstance().findNodeByName(MessagePasser.localName)));
-					}
 					MessagePasser.getInstance().rcvQueue.add(msg);
 				}
 			}

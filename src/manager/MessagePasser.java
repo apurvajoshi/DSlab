@@ -44,7 +44,7 @@ public class MessagePasser {
   public List<TimeStampedMessage> rcvQueue;
   private List<TimeStampedMessage> threadRcvQueue;
   public List<TimeStampedMessage> processQueue;
-
+  private List<TimeStampedMessage> meSendQueue; 
   private File configFile;  
   
   
@@ -60,7 +60,7 @@ public class MessagePasser {
 	  rcvQueue = Collections.synchronizedList(new ArrayList<TimeStampedMessage>());
 	  threadRcvQueue = Collections.synchronizedList(new ArrayList<TimeStampedMessage>());
 	  processQueue = Collections.synchronizedList(new ArrayList<TimeStampedMessage>());
-
+	  meSendQueue = Collections.synchronizedList(new ArrayList<TimeStampedMessage>());
   }
   
  public static MessagePasser getInstance() {
@@ -236,24 +236,23 @@ public class MessagePasser {
 	  for(int i = 0; i < nodes.size(); i++)
 	  {
   		TimeStampedMessage msg = new TimeStampedMessage(localName, nodes.get(i).getName(), m.getKind(), m.getData(), m.getTimeStamp());
-  		send(msg);
+  		sendAfterRuleCheck(msg);
 	  }
   }
   
   
-  public void sendMReq(TimeStampedMessage m)
+  public void send(TimeStampedMessage m)
   {
 	  Node localNode = this.findNodeByName(localName);
 	  for(int i = 0; i < localNode.getProcessGroup().size(); i++ )
 	  {
-		  TimeStampedMessage msg = new TimeStampedMessage(localName, localNode.getProcessGroup().get(i),"mreq", m.getData(), m.getTimeStamp());
-		  send(msg);
-
+		  TimeStampedMessage msg = new TimeStampedMessage(localName, localNode.getProcessGroup().get(i), m.getKind(), m.getData(), m.getTimeStamp());
+		  sendAfterRuleCheck(msg);
 	  }
   }
   
  
-  public synchronized void send(TimeStampedMessage message)
+  public synchronized void sendAfterRuleCheck(TimeStampedMessage message)
   {	  
 	  /* Set the id of the message before sending it */
 	  message.setId(MessagePasser.ID);
@@ -307,6 +306,7 @@ public class MessagePasser {
     			  /* Remove and call the send function */
     			  System.out.println("Sending message with id " +sendQueue.get(0).getId() + 
     					  " TIMESTAMP " + sendQueue.get(0).getTimeStamp().getCount());
+    			  this.meSendQueue.add(sendQueue.remove(0));
     			  sendViaSocket(sendQueue.remove(0));
     		  }
     		  
@@ -329,7 +329,7 @@ public class MessagePasser {
 			  /* Remove and call the send function */
 			  System.out.println("Sending message with id " +sendQueue.get(0).getId() + 
 					  " TIMESTAMP " + sendQueue.get(0).getTimeStamp().getCount());
-
+			  this.meSendQueue.add(sendQueue.remove(0));
 			  sendViaSocket(sendQueue.remove(0));			  
 		  }
       }
