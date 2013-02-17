@@ -107,7 +107,8 @@ public class MutualExclusionThread extends Thread {
 	private void sendMAck(TimeStampedMessage msg) {
 		System.out.println("Sending ACK");
 		TimeStampedMessage m = new TimeStampedMessage(MessagePasser.localName, msg.getSrc(), "mack", msg, msg.getTimeStamp());
-		MessagePasser.getInstance().send(m);
+		//MessagePasser.getInstance().send(m);
+		MessagePasser.getInstance().sendAfterRuleCheck(m);
 	}
 
 	
