@@ -23,7 +23,7 @@ public class SenderThread {
             	  ObjectOutputStream os = new ObjectOutputStream(clientSocket.getOutputStream());
             	  
                   os.writeObject(message);
-                  
+                  System.out.println("Wrote message to socket");
                   //Add to HashMap
                   clientSockets.put(Dest, clientSocket);
                   //clientSocket.close();              
@@ -42,6 +42,7 @@ public class SenderThread {
             	  ObjectOutputStream os = new ObjectOutputStream(clientSocket.getOutputStream());
             	  
                   os.writeObject(message);
+                  System.out.println("Wrote message to socket");
                                 
               } catch (UnknownHostException e) {
                   System.err.println("Don't know about host:" + ip + e);

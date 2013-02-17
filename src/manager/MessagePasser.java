@@ -244,6 +244,7 @@ public class MessagePasser {
   public void send(TimeStampedMessage m)
   {
 	  Node localNode = this.findNodeByName(localName);
+	  System.out.println("My group size " + localNode.getProcessGroup().size());
 	  for(int i = 0; i < localNode.getProcessGroup().size(); i++ )
 	  {
 		  TimeStampedMessage msg = new TimeStampedMessage(localName, localNode.getProcessGroup().get(i), m.getKind(), m.getData(), m.getTimeStamp());
@@ -277,8 +278,7 @@ public class MessagePasser {
 
       }
 	  
-	  /* Check the message against any send rules */
-      
+	  /* Check the message against any send rules */      
 	  int rule = checkMessageAgainstRules(message, this.sendRules, this.sendNthCount);
 	  
       if(rule != -1)
@@ -307,8 +307,9 @@ public class MessagePasser {
     			  System.out.println("Sending message with id " +sendQueue.get(0).getId() + 
     					  " TIMESTAMP " + sendQueue.get(0).getTimeStamp().getCount());
     			  
-    			  this.meSendQueue.add(sendQueue.remove(0));
-    			  sendViaSocket(sendQueue.remove(0));
+    			  TimeStampedMessage m = sendQueue.remove(0);
+    			  this.meSendQueue.add(m);
+    			  sendViaSocket(m);
     		  }
     		  
     	  }
@@ -330,8 +331,10 @@ public class MessagePasser {
 			  /* Remove and call the send function */
 			  System.out.println("Sending message with id " +sendQueue.get(0).getId() + 
 					  " TIMESTAMP " + sendQueue.get(0).getTimeStamp().getCount());
-			  this.meSendQueue.add(sendQueue.remove(0));
-			  sendViaSocket(sendQueue.remove(0));			  
+			  
+			  TimeStampedMessage m = sendQueue.remove(0);
+			  this.meSendQueue.add(m);
+			  sendViaSocket(m);
 		  }
       }
       
@@ -342,6 +345,7 @@ public class MessagePasser {
   void sendViaSocket(TimeStampedMessage message)
   {
 	  Node node = findNodeByName(message.getDest());
+	  System.out.println("sendViaSocket sending to " + node.getIp() + " " + node.getName());
 	  new SenderThread(message, node.getIp(), node.getPort(), clientSockets, message.getDest());
 	  
 	  if (LogMessage) {

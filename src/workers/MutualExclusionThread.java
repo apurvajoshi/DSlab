@@ -34,6 +34,7 @@ public class MutualExclusionThread extends Thread {
 			while(!this.threadRcvQueue.isEmpty())
 			{
 				TimeStampedMessage m = this.threadRcvQueue.remove(0);
+				System.out.println("Received message. Will apply rules");
 				MessagePasser.getInstance().addToProcessQueue(m); //apply rules
 				while(!MessagePasser.getInstance().processQueue.isEmpty())
 				{
@@ -49,6 +50,7 @@ public class MutualExclusionThread extends Thread {
 	}
 
 	private void validateMessage(TimeStampedMessage msg) {
+		System.out.println("Validating Message");
 		if (msg.getKind().equals("mreq")) {
 			if (criticalSection || voted) {
 				mutexQueue.add(msg);
@@ -78,12 +80,12 @@ public class MutualExclusionThread extends Thread {
 			}
 		}
 		else if (msg.getKind().equals("mack")) {
-			// Update count for a message with a give id.
+			// Update count for a message with a given id
 			Node localNode = MessagePasser.getInstance().findNodeByName(MessagePasser.localName);
+			
 			this.ackCounter++;
 			if(this.ackCounter == localNode.getProcessGroup().size())
-			{
-				
+			{				
 				/* Returns the message with minimum timestamp */
 				TimeStampedMessage m = Collections.min(MessagePasser.getInstance().meSendQueue, new Comparator<TimeStampedMessage>() {
 					public int compare(TimeStampedMessage  m1, TimeStampedMessage m2) {
