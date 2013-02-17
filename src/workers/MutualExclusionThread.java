@@ -72,12 +72,17 @@ public class MutualExclusionThread extends Thread {
 			else {
 				//send MACK to process with lowest TS in mutexQ
 				System.out.println("Sending mack to process with lowest TS");
+				System.out.println(this.mutexQueue);
+				for (TimeStampedMessage m : this.mutexQueue) {
+					System.out.println(m.getTimeStamp().getCount());
+				}
 				/* Returns the message with minimum timestamp */
 				TimeStampedMessage m = Collections.min(this.mutexQueue, new Comparator<TimeStampedMessage>() {
-					public int compare(TimeStampedMessage  m1, TimeStampedMessage m2) {
-                        return m2.getTimeStamp().getCount().get(0).compareTo(m1.getTimeStamp().getCount().get(0));
+					public int compare(TimeStampedMessage  m1, TimeStampedMessage m2) {						
+                        return m1.getTimeStamp().getCount().get(0).compareTo(m2.getTimeStamp().getCount().get(0));                        
                     }
 				});
+				System.out.println(m.getTimeStamp().getCount().get(0));
 				sendMAck(m);
 				this.mutexQueue.remove(m);
 				voted = true;
@@ -95,7 +100,7 @@ public class MutualExclusionThread extends Thread {
 				/* Returns the message with minimum timestamp */
 				TimeStampedMessage m = Collections.min(MessagePasser.getInstance().meSendQueue, new Comparator<TimeStampedMessage>() {
 					public int compare(TimeStampedMessage  m1, TimeStampedMessage m2) {
-                        return m2.getTimeStamp().getCount().get(0).compareTo(m1.getTimeStamp().getCount().get(0));
+                        return m1.getTimeStamp().getCount().get(0).compareTo(m2.getTimeStamp().getCount().get(0));
                     }
 				});
 				
