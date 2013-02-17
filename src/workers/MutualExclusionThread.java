@@ -34,7 +34,7 @@ public class MutualExclusionThread extends Thread {
 			while(!this.threadRcvQueue.isEmpty())
 			{
 				TimeStampedMessage m = this.threadRcvQueue.remove(0);
-				System.out.println("Received message. Will apply rules");
+				System.out.println("Received message");
 				MessagePasser.getInstance().addToProcessQueue(m); //apply rules
 				while(!MessagePasser.getInstance().processQueue.isEmpty())
 				{
@@ -53,13 +53,14 @@ public class MutualExclusionThread extends Thread {
 		System.out.println("Validating Message");
 		if (msg.getKind().equals("mreq")) {
 			if (criticalSection || voted) {
+				System.out.println("got mreq");
 				mutexQueue.add(msg);
 			}
 			else {
+				System.out.println("Not in critical section or voted = false, sending ACK");
 				sendMAck(msg);
 				voted = true;
 			}
-			
 		}
 		else if (msg.getKind().equals("mrel")) {
 			if (mutexQueue.size() == 0) {
@@ -95,6 +96,7 @@ public class MutualExclusionThread extends Thread {
 				
 				/* Enter critical Section */
 				System.out.println("Entering critical Section.");
+				this.criticalSection = true;
 				MessagePasser.getInstance().meSendQueue.remove(m);
 				ackCounter = 0;
 			}
