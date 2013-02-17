@@ -388,7 +388,6 @@ public class MessagePasser {
   /* Does rule processing + resync's the timestamp */
   public void addToProcessQueue(TimeStampedMessage m)
   {
-	  System.out.println("addToProcessQueue");
 	
 	  /* Reread the configuration file if the modification time has been changed*/	  
 	  File f = configFile;	  

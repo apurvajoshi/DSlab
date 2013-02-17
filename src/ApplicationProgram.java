@@ -51,6 +51,7 @@ public class ApplicationProgram {
 	    	        		TimeStamp t = new TimeStamp(m.getClockService().getTimestamp());
 	    	        		TimeStampedMessage msg = new TimeStampedMessage(args[1], args[1], kind, data, t);
 	    	        		m.msgProcessThread.setCriticalSection(false);
+        	        		System.out.println("Leaving critical section");
 	    	        		m.send(msg);
 	    	        		break;
         	        case 1: 
