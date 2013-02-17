@@ -34,7 +34,7 @@ public class MutualExclusionThread extends Thread {
 			while(!this.threadRcvQueue.isEmpty())
 			{
 				TimeStampedMessage m = this.threadRcvQueue.remove(0);
-				System.out.println("Received message");
+				//System.out.println("Received message");
 				MessagePasser.getInstance().addToProcessQueue(m); //apply rules
 				while(!MessagePasser.getInstance().processQueue.isEmpty())
 				{
@@ -50,50 +50,52 @@ public class MutualExclusionThread extends Thread {
 	}
 
 	private void validateMessage(TimeStampedMessage msg) {
-		System.out.println("Validating Message");
+		//System.out.println("Validating Message");
 		if (msg.getKind().equals("mreq")) {
-			System.out.println("got mreq");
+			//System.out.println("got mreq");
 			if (criticalSection || voted) {
-				System.out.println("In critical section or voted = true, adding to queue");
+				//System.out.println("In critical section or voted = true, adding to queue");
 				mutexQueue.add(msg);
 			}
 			else {
-				System.out.println("Not in critical section or voted = false, sending ACK");
+				//System.out.println("Not in critical section or voted = false, sending ACK");
 				sendMAck(msg);
 				voted = true;
 			}
 		}
 		else if (msg.getKind().equals("mrel")) {
-			System.out.println("got mrel");
+			//System.out.println("got mrel");
 			if (mutexQueue.size() == 0) {
-				System.out.println("mutexQueue size zero, setting voted = false");
+				//System.out.println("mutexQueue size zero, setting voted = false");
 				voted = false;
 			}
 			else {
 				//send MACK to process with lowest TS in mutexQ
-				System.out.println("Sending mack to process with lowest TS");
-				System.out.println(this.mutexQueue);
+				//System.out.println("Sending mack to process with lowest TS");
+				//System.out.println(this.mutexQueue);
+				/*
 				for (TimeStampedMessage m : this.mutexQueue) {
 					System.out.println(m.getTimeStamp().getCount());
 				}
+				*/
 				/* Returns the message with minimum timestamp */
 				TimeStampedMessage m = Collections.min(this.mutexQueue, new Comparator<TimeStampedMessage>() {
 					public int compare(TimeStampedMessage  m1, TimeStampedMessage m2) {						
                         return m1.getTimeStamp().getCount().get(0).compareTo(m2.getTimeStamp().getCount().get(0));                        
                     }
 				});
-				System.out.println(m.getTimeStamp().getCount().get(0));
+				//System.out.println(m.getTimeStamp().getCount().get(0));
 				sendMAck(m);
 				this.mutexQueue.remove(m);
 				voted = true;
 			}
 		}
 		else if (msg.getKind().equals("mack")) {
-			System.out.println("got mack");
+			//System.out.println("got mack");
 			// Update count for a message with a given id
 			Node localNode = MessagePasser.getInstance().findNodeByName(MessagePasser.localName);
 			
-			System.out.println("incrementing ack counter");
+			//System.out.println("incrementing ack counter");
 			this.ackCounter++;
 			if(this.ackCounter == localNode.getProcessGroup().size())
 			{				
