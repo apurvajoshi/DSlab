@@ -67,8 +67,8 @@ public class ApplicationProgram {
         	        		
         	        		//System.out.println("Kind? ");
         	        		//String kind = inputReader.nextLine();
+        	        	
         	        		kind = "mreq";
-        	        		
         	        		System.out.println("Data? ");
         	        		data = inputReader.nextLine();
         	        		

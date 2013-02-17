@@ -245,7 +245,6 @@ public class MessagePasser {
   public void send(TimeStampedMessage m)
   {
 	  Node localNode = this.findNodeByName(localName);
-	  System.out.println("My group size " + localNode.getProcessGroup().size());
 	  for(int i = 0; i < localNode.getProcessGroup().size(); i++ )
 	  {
 		  TimeStampedMessage msg = new TimeStampedMessage(localName, localNode.getProcessGroup().get(i), m.getKind(), m.getData(), m.getTimeStamp());
@@ -347,7 +346,6 @@ public class MessagePasser {
   void sendViaSocket(TimeStampedMessage message)
   {
 	  Node node = findNodeByName(message.getDest());
-	  System.out.println("sendViaSocket sending to " + node.getIp() + " " + node.getName());
 	  new SenderThread(message, node.getIp(), node.getPort(), clientSockets, message.getDest());
 	  
 	  if (LogMessage) {
