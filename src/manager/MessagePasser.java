@@ -35,6 +35,7 @@ public class MessagePasser {
   public boolean LogMessage = false;
   public ClockService clockService;
   public static String localName;
+  public MutualExclusionThread msgProcessThread;
 
   private static Integer ID = 1;
   private long modificationTime;
@@ -96,9 +97,9 @@ public class MessagePasser {
 		  Thread t = new ListenerThread(node.getPort(), this.threadRcvQueue);
 		  t.start();
 		  
-		  Thread msgProcessThread = new MutualExclusionThread(threadRcvQueue);
+		  this.msgProcessThread = new MutualExclusionThread(threadRcvQueue);
 		  //Thread msgProcessThread = new MulticastMsgProcessThread(this.threadRcvQueue);
-		  msgProcessThread.start();
+		  this.msgProcessThread.start();
 	  } 
 	  catch(IOException e)
 	  {
@@ -248,6 +249,7 @@ public class MessagePasser {
 	  for(int i = 0; i < localNode.getProcessGroup().size(); i++ )
 	  {
 		  TimeStampedMessage msg = new TimeStampedMessage(localName, localNode.getProcessGroup().get(i), m.getKind(), m.getData(), m.getTimeStamp());
+		  this.
 		  sendAfterRuleCheck(msg);
 	  }
   }

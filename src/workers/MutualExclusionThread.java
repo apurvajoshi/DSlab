@@ -52,8 +52,9 @@ public class MutualExclusionThread extends Thread {
 	private void validateMessage(TimeStampedMessage msg) {
 		System.out.println("Validating Message");
 		if (msg.getKind().equals("mreq")) {
+			System.out.println("got mreq");
 			if (criticalSection || voted) {
-				System.out.println("got mreq");
+				System.out.println("In critical section or voted = true, adding to queue");
 				mutexQueue.add(msg);
 			}
 			else {
@@ -63,12 +64,14 @@ public class MutualExclusionThread extends Thread {
 			}
 		}
 		else if (msg.getKind().equals("mrel")) {
+			System.out.println("got mrel");
 			if (mutexQueue.size() == 0) {
+				System.out.println("mutexQueue size zero, setting voted = false");
 				voted = false;
 			}
 			else {
 				//send MACK to process with lowest TS in mutexQ
-				
+				System.out.println("Sending mack to process with lowest TS");
 				/* Returns the message with minimum timestamp */
 				TimeStampedMessage m = Collections.min(this.mutexQueue, new Comparator<TimeStampedMessage>() {
 					public int compare(TimeStampedMessage  m1, TimeStampedMessage m2) {
@@ -81,9 +84,11 @@ public class MutualExclusionThread extends Thread {
 			}
 		}
 		else if (msg.getKind().equals("mack")) {
+			System.out.println("got mack");
 			// Update count for a message with a given id
 			Node localNode = MessagePasser.getInstance().findNodeByName(MessagePasser.localName);
 			
+			System.out.println("incrementing ack counter");
 			this.ackCounter++;
 			if(this.ackCounter == localNode.getProcessGroup().size())
 			{				
@@ -104,6 +109,14 @@ public class MutualExclusionThread extends Thread {
 	}
 	
 	
+	public boolean isCriticalSection() {
+		return criticalSection;
+	}
+
+	public void setCriticalSection(boolean criticalSection) {
+		this.criticalSection = criticalSection;
+	}
+
 	private void sendMAck(TimeStampedMessage msg) {
 		System.out.println("Sending ACK");
 		TimeStampedMessage m = new TimeStampedMessage(MessagePasser.localName, msg.getSrc(), "mack", msg, msg.getTimeStamp());
